@@ -1,5 +1,7 @@
-import type { Player, InsertPlayer, Schedule, InsertSchedule, ScheduleData } from "@shared/schema";
-import { randomUUID } from "crypto";
+import type { Player, InsertPlayer, Schedule, InsertSchedule } from "@shared/schema";
+import { players, schedules } from "@shared/schema";
+import { db } from "./db";
+import { eq, and } from "drizzle-orm";
 
 export interface IStorage {
   getSchedule(weekStartDate: string, weekEndDate: string): Promise<Schedule | undefined>;
@@ -9,46 +11,70 @@ export interface IStorage {
   removePlayer(id: string): Promise<boolean>;
 }
 
-export class MemStorage implements IStorage {
-  private schedules: Map<string, Schedule>;
-  private players: Map<string, Player>;
-
-  constructor() {
-    this.schedules = new Map();
-    this.players = new Map();
-  }
-
+export class DbStorage implements IStorage {
   async getSchedule(weekStartDate: string, weekEndDate: string): Promise<Schedule | undefined> {
-    const key = `${weekStartDate}_${weekEndDate}`;
-    return this.schedules.get(key);
+    const result = await db
+      .select()
+      .from(schedules)
+      .where(
+        and(
+          eq(schedules.weekStartDate, weekStartDate),
+          eq(schedules.weekEndDate, weekEndDate)
+        )
+      )
+      .limit(1);
+
+    return result[0];
   }
 
   async saveSchedule(insertSchedule: InsertSchedule): Promise<Schedule> {
-    const id = randomUUID();
-    const schedule: Schedule = { 
-      ...insertSchedule, 
-      id,
-      scheduleData: insertSchedule.scheduleData as any
-    };
-    const key = `${insertSchedule.weekStartDate}_${insertSchedule.weekEndDate}`;
-    this.schedules.set(key, schedule);
-    return schedule;
+    const existing = await this.getSchedule(
+      insertSchedule.weekStartDate,
+      insertSchedule.weekEndDate
+    );
+
+    if (existing) {
+      const updated = await db
+        .update(schedules)
+        .set({
+          scheduleData: insertSchedule.scheduleData as any,
+          googleSheetId: insertSchedule.googleSheetId,
+        })
+        .where(eq(schedules.id, existing.id))
+        .returning();
+
+      return updated[0];
+    }
+
+    const inserted = await db
+      .insert(schedules)
+      .values(insertSchedule)
+      .returning();
+
+    return inserted[0];
   }
 
   async getAllPlayers(): Promise<Player[]> {
-    return Array.from(this.players.values());
+    return await db.select().from(players);
   }
 
   async addPlayer(insertPlayer: InsertPlayer): Promise<Player> {
-    const id = randomUUID();
-    const player: Player = { ...insertPlayer, id };
-    this.players.set(id, player);
-    return player;
+    const inserted = await db
+      .insert(players)
+      .values(insertPlayer)
+      .returning();
+
+    return inserted[0];
   }
 
   async removePlayer(id: string): Promise<boolean> {
-    return this.players.delete(id);
+    const deleted = await db
+      .delete(players)
+      .where(eq(players.id, id))
+      .returning();
+
+    return deleted.length > 0;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DbStorage();
