@@ -5,7 +5,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2, ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Trash2, ArrowLeft, ChevronLeft, ChevronRight, Pencil } from "lucide-react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths } from "date-fns";
 import type { Event } from "@shared/schema";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -134,6 +134,7 @@ function CustomCalendar({ selectedDate, onSelectDate, eventsByDate }: CustomCale
 export default function Events() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [showEventDialog, setShowEventDialog] = useState(false);
+  const [eventToEdit, setEventToEdit] = useState<Event | undefined>(undefined);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState<"success" | "error">("success");
@@ -219,7 +220,10 @@ export default function Events() {
             </p>
           </div>
           <Button
-            onClick={() => setShowEventDialog(true)}
+            onClick={() => {
+              setEventToEdit(undefined);
+              setShowEventDialog(true);
+            }}
             data-testid="button-add-event"
             className="gap-2"
           >
@@ -287,15 +291,28 @@ export default function Events() {
                           </p>
                         )}
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => deleteMutation.mutate(event.id)}
-                        disabled={deleteMutation.isPending}
-                        data-testid={`button-delete-event-${event.id}`}
-                      >
-                        <Trash2 className="w-4 h-4 text-destructive" />
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            setEventToEdit(event);
+                            setShowEventDialog(true);
+                          }}
+                          data-testid={`button-edit-event-${event.id}`}
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => deleteMutation.mutate(event.id)}
+                          disabled={deleteMutation.isPending}
+                          data-testid={`button-delete-event-${event.id}`}
+                        >
+                          <Trash2 className="w-4 h-4 text-destructive" />
+                        </Button>
+                      </div>
                     </div>
                   </Card>
                 ))}
@@ -308,12 +325,19 @@ export default function Events() {
       {showEventDialog && (
         <EventDialog
           open={showEventDialog}
-          onOpenChange={setShowEventDialog}
+          onOpenChange={(open) => {
+            setShowEventDialog(open);
+            if (!open) {
+              setEventToEdit(undefined);
+            }
+          }}
           selectedDate={selectedDate}
+          eventToEdit={eventToEdit}
           onSuccess={(message: string) => {
             setToastMessage(message);
             setToastType("success");
             setShowToast(true);
+            setEventToEdit(undefined);
           }}
         />
       )}
