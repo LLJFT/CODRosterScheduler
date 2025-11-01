@@ -1,0 +1,46 @@
+/* Large calendar styling */
+.calendar-large {
+  width: 100%;
+}
+
+.calendar-large .rdp {
+  --rdp-cell-size: 120px;
+  width: 100%;
+}
+
+.calendar-large .rdp-months {
+  width: 100%;
+  justify-content: center;
+}
+
+.calendar-large .rdp-month {
+  width: 100%;
+}
+
+.calendar-large .rdp-table {
+  width: 100%;
+  max-width: none;
+}
+
+.calendar-large .rdp-cell {
+  height: 120px;
+  width: 14.28%;
+  padding: 0;
+}
+
+.calendar-large .rdp-day {
+  height: 100%;
+  width: 100%;
+  border-radius: 0;
+  font-size: 14px;
+  padding: 0;
+}
+
+.calendar-large .rdp-day_selected {
+  background-color: hsl(var(--primary) / 0.2);
+  border: 2px solid hsl(var(--primary));
+}
+
+.calendar-large .rdp-day:hover {
+  background-color: hsl(var(--accent));
+}

@@ -11,6 +11,7 @@ import type { Event } from "@shared/schema";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { EventDialog } from "@/components/EventDialog";
 import { SimpleToast } from "@/components/SimpleToast";
+import "./events-calendar.css";
 
 export default function Events() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
@@ -51,8 +52,20 @@ export default function Events() {
     return events.map((event) => new Date(event.date));
   };
 
+  const getEventsByDateMap = () => {
+    const map: Record<string, Event[]> = {};
+    events.forEach((event) => {
+      if (!map[event.date]) {
+        map[event.date] = [];
+      }
+      map[event.date].push(event);
+    });
+    return map;
+  };
+
   const eventsForSelectedDate = getEventsForDate(selectedDate);
   const datesWithEvents = getDatesWithEvents();
+  const eventsByDate = getEventsByDateMap();
 
   const getEventTypeBadgeVariant = (eventType: string) => {
     switch (eventType) {
@@ -97,25 +110,67 @@ export default function Events() {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="p-6">
-            <h2 className="text-xl font-semibold mb-4 text-foreground">Calendar</h2>
-            <Calendar
-              mode="single"
-              selected={selectedDate}
-              onSelect={setSelectedDate}
-              modifiers={{
-                hasEvent: datesWithEvents,
-              }}
-              modifiersStyles={{
-                hasEvent: {
-                  fontWeight: "bold",
-                  textDecoration: "underline",
-                },
-              }}
-              className="rounded-md border"
-              data-testid="calendar-events"
-            />
+        <div className="grid grid-cols-1 gap-6">
+          <Card className="p-8">
+            <h2 className="text-xl font-semibold mb-6 text-foreground">Calendar</h2>
+            <div className="calendar-large">
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={setSelectedDate}
+                modifiers={{
+                  hasEvent: datesWithEvents,
+                }}
+                modifiersStyles={{
+                  hasEvent: {
+                    fontWeight: "bold",
+                  },
+                }}
+                className="rounded-md border w-full"
+                data-testid="calendar-events"
+                components={{
+                  DayContent: ({ date }) => {
+                    const dateStr = format(date, "yyyy-MM-dd");
+                    const dayEvents = eventsByDate[dateStr] || [];
+                    return (
+                      <div className="w-full h-full flex flex-col items-center justify-start p-1">
+                        <div className="text-sm mb-1">{format(date, "d")}</div>
+                        <div className="flex flex-col gap-0.5 w-full">
+                          {dayEvents.slice(0, 3).map((event, idx) => (
+                            <div
+                              key={idx}
+                              className="text-[9px] px-1 py-0.5 rounded truncate w-full"
+                              style={{
+                                backgroundColor:
+                                  event.eventType === "Tournament"
+                                    ? "hsl(var(--primary))"
+                                    : event.eventType === "Scrim"
+                                    ? "hsl(var(--secondary))"
+                                    : "hsl(var(--accent))",
+                                color:
+                                  event.eventType === "Tournament"
+                                    ? "hsl(var(--primary-foreground))"
+                                    : event.eventType === "Scrim"
+                                    ? "hsl(var(--secondary-foreground))"
+                                    : "hsl(var(--accent-foreground))",
+                              }}
+                              title={event.title}
+                            >
+                              {event.title}
+                            </div>
+                          ))}
+                          {dayEvents.length > 3 && (
+                            <div className="text-[8px] text-muted-foreground text-center">
+                              +{dayEvents.length - 3} more
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  },
+                }}
+              />
+            </div>
           </Card>
 
           <Card className="p-6">
