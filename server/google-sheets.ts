@@ -246,7 +246,7 @@ export async function writeScheduleToSheet(sheetName: string, data: any[][]) {
               fields: 'userEnteredFormat(backgroundColor,horizontalAlignment,verticalAlignment,textFormat,borders)',
             },
           },
-          // Style data rows - borders and center alignment
+          // Style data rows - strong borders and center alignment
           {
             repeatCell: {
               range: {
@@ -261,10 +261,10 @@ export async function writeScheduleToSheet(sheetName: string, data: any[][]) {
                   horizontalAlignment: 'CENTER',
                   verticalAlignment: 'MIDDLE',
                   borders: {
-                    top: { style: 'SOLID', width: 1, color: { red: 0.8, green: 0.8, blue: 0.8 } },
-                    bottom: { style: 'SOLID', width: 1, color: { red: 0.8, green: 0.8, blue: 0.8 } },
-                    left: { style: 'SOLID', width: 1, color: { red: 0.8, green: 0.8, blue: 0.8 } },
-                    right: { style: 'SOLID', width: 1, color: { red: 0.8, green: 0.8, blue: 0.8 } },
+                    top: { style: 'SOLID', width: 1, color: { red: 0, green: 0, blue: 0 } },
+                    bottom: { style: 'SOLID', width: 1, color: { red: 0, green: 0, blue: 0 } },
+                    left: { style: 'SOLID', width: 1, color: { red: 0, green: 0, blue: 0 } },
+                    right: { style: 'SOLID', width: 1, color: { red: 0, green: 0, blue: 0 } },
                   },
                 },
               },
@@ -337,14 +337,14 @@ export async function writeScheduleToSheet(sheetName: string, data: any[][]) {
       },
     });
 
-    // Add role-specific coloring to entire rows
+    // Add role-specific coloring to entire rows with strong borders
     const roleColors: Record<string, { red: number; green: number; blue: number }> = {
       Tank: { red: 0.678, green: 0.847, blue: 0.902 },      // Light blue #ADD8E6
       DPS: { red: 1, green: 0.753, blue: 0.796 },           // Light pink/red #FFC0CB
       Support: { red: 0.565, green: 0.933, blue: 0.565 },   // Light green #90EE90
     };
 
-    // Apply colors to entire rows based on role
+    // Apply colors to entire rows based on role with strong borders
     const colorRequests: any[] = [];
     for (let i = 3; i < numRows; i++) {
       const row = data[i];
@@ -352,7 +352,7 @@ export async function writeScheduleToSheet(sheetName: string, data: any[][]) {
         const role = row[0];
         const color = roleColors[role];
         if (color) {
-          // Color the entire row from column A to the last column
+          // Color the entire row with strong black borders
           colorRequests.push({
             repeatCell: {
               range: {
@@ -360,14 +360,20 @@ export async function writeScheduleToSheet(sheetName: string, data: any[][]) {
                 startRowIndex: i,
                 endRowIndex: i + 1,
                 startColumnIndex: 0,
-                endColumnIndex: numCols, // Color entire row
+                endColumnIndex: numCols,
               },
               cell: {
                 userEnteredFormat: {
                   backgroundColor: color,
+                  borders: {
+                    top: { style: 'SOLID', width: 1, color: { red: 0, green: 0, blue: 0 } },
+                    bottom: { style: 'SOLID', width: 1, color: { red: 0, green: 0, blue: 0 } },
+                    left: { style: 'SOLID', width: 1, color: { red: 0, green: 0, blue: 0 } },
+                    right: { style: 'SOLID', width: 1, color: { red: 0, green: 0, blue: 0 } },
+                  },
                 },
               },
-              fields: 'userEnteredFormat(backgroundColor)',
+              fields: 'userEnteredFormat(backgroundColor,borders)',
             },
           });
           // Make Role column bold
