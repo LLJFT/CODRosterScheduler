@@ -1,37 +1,53 @@
-import { type User, type InsertUser } from "@shared/schema";
+import type { Player, InsertPlayer, Schedule, InsertSchedule, ScheduleData } from "@shared/schema";
 import { randomUUID } from "crypto";
 
-// modify the interface with any CRUD methods
-// you might need
-
 export interface IStorage {
-  getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  getSchedule(weekStartDate: string, weekEndDate: string): Promise<Schedule | undefined>;
+  saveSchedule(schedule: InsertSchedule): Promise<Schedule>;
+  getAllPlayers(): Promise<Player[]>;
+  addPlayer(player: InsertPlayer): Promise<Player>;
+  removePlayer(id: string): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
-  private users: Map<string, User>;
+  private schedules: Map<string, Schedule>;
+  private players: Map<string, Player>;
 
   constructor() {
-    this.users = new Map();
+    this.schedules = new Map();
+    this.players = new Map();
   }
 
-  async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
+  async getSchedule(weekStartDate: string, weekEndDate: string): Promise<Schedule | undefined> {
+    const key = `${weekStartDate}_${weekEndDate}`;
+    return this.schedules.get(key);
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
+  async saveSchedule(insertSchedule: InsertSchedule): Promise<Schedule> {
     const id = randomUUID();
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
-    return user;
+    const schedule: Schedule = { 
+      ...insertSchedule, 
+      id,
+      scheduleData: insertSchedule.scheduleData as any
+    };
+    const key = `${insertSchedule.weekStartDate}_${insertSchedule.weekEndDate}`;
+    this.schedules.set(key, schedule);
+    return schedule;
+  }
+
+  async getAllPlayers(): Promise<Player[]> {
+    return Array.from(this.players.values());
+  }
+
+  async addPlayer(insertPlayer: InsertPlayer): Promise<Player> {
+    const id = randomUUID();
+    const player: Player = { ...insertPlayer, id };
+    this.players.set(id, player);
+    return player;
+  }
+
+  async removePlayer(id: string): Promise<boolean> {
+    return this.players.delete(id);
   }
 }
 
