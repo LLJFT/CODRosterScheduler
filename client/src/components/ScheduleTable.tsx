@@ -7,12 +7,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import type { PlayerAvailability, DayOfWeek, AvailabilityOption } from "@shared/schema";
+import { Input } from "@/components/ui/input";
+import type { PlayerAvailability, DayOfWeek, AvailabilityOption, RoleType } from "@shared/schema";
 import { dayOfWeek, availabilityOptions } from "@shared/schema";
 
 interface ScheduleTableProps {
   scheduleData: PlayerAvailability[];
   onAvailabilityChange: (playerId: string, day: DayOfWeek, availability: AvailabilityOption) => void;
+  onRoleChange?: (playerId: string, role: RoleType) => void;
+  onPlayerNameChange?: (playerId: string, name: string) => void;
   isLoading?: boolean;
 }
 
@@ -44,9 +47,11 @@ const availabilityDisplayText: Record<AvailabilityOption, string> = {
   "cannot": "cannot",
 };
 
-export function ScheduleTable({ scheduleData, onAvailabilityChange, isLoading }: ScheduleTableProps) {
+export function ScheduleTable({ scheduleData, onAvailabilityChange, onRoleChange, onPlayerNameChange, isLoading }: ScheduleTableProps) {
   const tableRef = useRef<HTMLDivElement>(null);
   const [openDropdowns, setOpenDropdowns] = useState<Set<string>>(new Set());
+  const [editingName, setEditingName] = useState<string | null>(null);
+  const [editedName, setEditedName] = useState<string>("");
 
   const handleOpenChange = (key: string, isOpen: boolean) => {
     setOpenDropdowns(prev => {
@@ -58,6 +63,24 @@ export function ScheduleTable({ scheduleData, onAvailabilityChange, isLoading }:
       }
       return next;
     });
+  };
+
+  const handleNameEdit = (playerId: string, currentName: string) => {
+    setEditingName(playerId);
+    setEditedName(currentName);
+  };
+
+  const handleNameSave = (playerId: string) => {
+    if (editedName.trim() && onPlayerNameChange) {
+      onPlayerNameChange(playerId, editedName.trim());
+    }
+    setEditingName(null);
+    setEditedName("");
+  };
+
+  const handleNameCancel = () => {
+    setEditingName(null);
+    setEditedName("");
   };
 
   const groupedByRole = scheduleData.reduce((acc, player) => {
@@ -104,19 +127,57 @@ export function ScheduleTable({ scheduleData, onAvailabilityChange, isLoading }:
                   className="border-t border-border hover-elevate"
                   data-testid={`row-player-${player.playerId}`}
                 >
-                  <td className="border-r border-border px-4 py-3 bg-card">
-                    <Badge
-                      variant="secondary"
-                      className={`${roleColors[role]} font-medium text-xs`}
-                      data-testid={`badge-role-${player.playerId}`}
+                  <td className="border-r border-border px-2 py-2 bg-card">
+                    <Select
+                      value={player.role}
+                      onValueChange={(value: RoleType) => {
+                        if (onRoleChange) {
+                          onRoleChange(player.playerId, value);
+                        }
+                      }}
+                      disabled={isLoading}
                     >
-                      {roleDisplayNames[role]}
-                    </Badge>
+                      <SelectTrigger
+                        className={`w-full h-9 text-xs font-medium ${roleColors[role]} border-0 focus:ring-1 focus:ring-ring`}
+                        data-testid={`select-role-${player.playerId}`}
+                      >
+                        <SelectValue>
+                          {roleDisplayNames[player.role]}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Tank" className="text-sm">Tank</SelectItem>
+                        <SelectItem value="DPS" className="text-sm">DPS</SelectItem>
+                        <SelectItem value="Support" className="text-sm">Support</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </td>
-                  <td className="border-r border-border px-4 py-3 bg-card">
-                    <span className="text-sm font-medium text-card-foreground" data-testid={`text-player-name-${player.playerId}`}>
-                      {player.playerName}
-                    </span>
+                  <td className="border-r border-border px-2 py-2 bg-card">
+                    {editingName === player.playerId ? (
+                      <Input
+                        value={editedName}
+                        onChange={(e) => setEditedName(e.target.value)}
+                        onBlur={() => handleNameSave(player.playerId)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            handleNameSave(player.playerId);
+                          } else if (e.key === 'Escape') {
+                            handleNameCancel();
+                          }
+                        }}
+                        className="h-8 text-sm"
+                        autoFocus
+                        data-testid={`input-edit-player-name-${player.playerId}`}
+                      />
+                    ) : (
+                      <div
+                        onClick={() => handleNameEdit(player.playerId, player.playerName)}
+                        className="text-sm font-medium text-card-foreground cursor-pointer hover:bg-accent/50 px-2 py-1 rounded-md"
+                        data-testid={`text-player-name-${player.playerId}`}
+                      >
+                        {player.playerName}
+                      </div>
+                    )}
                   </td>
                   {dayOfWeek.map((day) => {
                     const availability = player.availability[day];

@@ -14,7 +14,12 @@ Preferred communication style: Simple, everyday language.
   - Removed Sub and Coach roles from all components
   - Updated schema, PlayerManager, and ScheduleTable
   - Cleaner role selection with only core competitive roles
-- **Player Edit Functionality** (November 1, 2025): Added ability to edit existing players
+- **Inline Editing from Schedule Table** (November 1, 2025): Edit players directly from the table
+  - **Role dropdown in table**: Click role to change between Tank/DPS/Support
+  - **Player name editing**: Click player name to edit inline, press Enter or click outside to save
+  - Changes trigger unsaved state and require Save button click
+  - Real-time updates in the UI
+- **Player Edit Functionality** (November 1, 2025): Added ability to edit existing players via Manage Players
   - Edit button (pencil icon) next to each player in Manage Players dialog
   - Dialog switches to edit mode showing "Edit Player" title
   - Pre-fills player name and role for easy modification

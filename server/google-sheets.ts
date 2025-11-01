@@ -139,10 +139,37 @@ export async function writeScheduleToSheet(sheetName: string, data: any[][]) {
       sheetId = sheet?.properties?.sheetId || 0;
     }
 
+    // Clear existing data and data validations
     await sheets.spreadsheets.values.clear({
       spreadsheetId,
       range: `${sheetName}!A1:Z100`,
     });
+
+    // Clear existing data validations to avoid conflicts
+    try {
+      await sheets.spreadsheets.batchUpdate({
+        spreadsheetId,
+        requestBody: {
+          requests: [
+            {
+              setDataValidation: {
+                range: {
+                  sheetId: sheetId,
+                  startRowIndex: 0,
+                  endRowIndex: 1000,
+                  startColumnIndex: 0,
+                  endColumnIndex: 26,
+                },
+                rule: null as any,
+              },
+            },
+          ],
+        },
+      });
+    } catch (error) {
+      // Ignore errors if there's no validation to clear
+      console.log('[Google Sheets] No existing validation to clear');
+    }
 
     await sheets.spreadsheets.values.update({
       spreadsheetId,

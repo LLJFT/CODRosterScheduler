@@ -101,6 +101,28 @@ export default function Home() {
     setHasChanges(true);
   };
 
+  const handleRoleChange = (playerId: string, role: RoleType) => {
+    setScheduleData((prev) =>
+      prev.map((player) =>
+        player.playerId === playerId
+          ? { ...player, role }
+          : player
+      )
+    );
+    setHasChanges(true);
+  };
+
+  const handlePlayerNameChange = (playerId: string, name: string) => {
+    setScheduleData((prev) =>
+      prev.map((player) =>
+        player.playerId === playerId
+          ? { ...player, playerName: name }
+          : player
+      )
+    );
+    setHasChanges(true);
+  };
+
   const handleAddPlayer = (name: string, role: RoleType) => {
     const newPlayer: PlayerAvailability = {
       playerId: nanoid(),
@@ -253,6 +275,8 @@ export default function Home() {
               <ScheduleTable
                 scheduleData={scheduleData}
                 onAvailabilityChange={handleAvailabilityChange}
+                onRoleChange={handleRoleChange}
+                onPlayerNameChange={handlePlayerNameChange}
                 isLoading={saveMutation.isPending}
               />
 
