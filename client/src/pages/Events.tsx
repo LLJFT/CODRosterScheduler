@@ -133,13 +133,13 @@ export default function Events() {
                     const dateStr = format(date, "yyyy-MM-dd");
                     const dayEvents = eventsByDate[dateStr] || [];
                     return (
-                      <div className="w-full h-full flex flex-col items-center justify-start p-1">
-                        <div className="text-sm mb-1">{format(date, "d")}</div>
-                        <div className="flex flex-col gap-0.5 w-full">
-                          {dayEvents.slice(0, 3).map((event, idx) => (
+                      <div className="w-full h-full flex flex-col items-start justify-start p-2">
+                        <div className="text-base font-semibold mb-2">{format(date, "d")}</div>
+                        <div className="flex flex-col gap-1 w-full overflow-y-auto max-h-[140px]">
+                          {dayEvents.map((event, idx) => (
                             <div
                               key={idx}
-                              className="text-[9px] px-1 py-0.5 rounded truncate w-full"
+                              className="text-xs px-2 py-1 rounded w-full"
                               style={{
                                 backgroundColor:
                                   event.eventType === "Tournament"
@@ -154,16 +154,14 @@ export default function Events() {
                                     ? "hsl(var(--secondary-foreground))"
                                     : "hsl(var(--accent-foreground))",
                               }}
-                              title={event.title}
+                              title={`${event.title}${event.time ? ` - ${event.time}` : ''}`}
                             >
-                              {event.title}
+                              <div className="font-semibold truncate">{event.title}</div>
+                              {event.time && (
+                                <div className="text-[10px] opacity-90">{event.time}</div>
+                              )}
                             </div>
                           ))}
-                          {dayEvents.length > 3 && (
-                            <div className="text-[8px] text-muted-foreground text-center">
-                              +{dayEvents.length - 3} more
-                            </div>
-                          )}
                         </div>
                       </div>
                     );
