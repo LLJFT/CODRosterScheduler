@@ -16,9 +16,11 @@ interface CustomCalendarProps {
   selectedDate: Date | undefined;
   onSelectDate: (date: Date | undefined) => void;
   eventsByDate: Record<string, Event[]>;
+  onEventDoubleClick: (event: Event) => void;
+  onDayDoubleClick: (date: Date) => void;
 }
 
-function CustomCalendar({ selectedDate, onSelectDate, eventsByDate }: CustomCalendarProps) {
+function CustomCalendar({ selectedDate, onSelectDate, eventsByDate, onEventDoubleClick, onDayDoubleClick }: CustomCalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
   const monthStart = startOfMonth(currentMonth);
@@ -83,6 +85,7 @@ function CustomCalendar({ selectedDate, onSelectDate, eventsByDate }: CustomCale
               <div
                 key={idx}
                 onClick={() => onSelectDate(day)}
+                onDoubleClick={() => onDayDoubleClick(day)}
                 className={`
                   min-h-[180px] p-2 border-r border-b last:border-r-0
                   cursor-pointer hover-elevate active-elevate-2
@@ -99,7 +102,7 @@ function CustomCalendar({ selectedDate, onSelectDate, eventsByDate }: CustomCale
                   {dayEvents.map((event, eventIdx) => (
                     <div
                       key={eventIdx}
-                      className="text-xs px-2 py-1 rounded truncate"
+                      className="text-xs px-2 py-1 rounded truncate cursor-pointer"
                       style={{
                         backgroundColor:
                           event.eventType === "Tournament"
@@ -116,6 +119,10 @@ function CustomCalendar({ selectedDate, onSelectDate, eventsByDate }: CustomCale
                       }}
                       title={`${event.title}${event.time ? ` - ${event.time}` : ''}`}
                       data-testid={`calendar-event-${event.id}`}
+                      onDoubleClick={(e) => {
+                        e.stopPropagation();
+                        onEventDoubleClick(event);
+                      }}
                     >
                       <div className="font-semibold">{event.time || ""}</div>
                       <div>{event.title}</div>
@@ -239,6 +246,15 @@ export default function Events() {
               selectedDate={selectedDate}
               onSelectDate={setSelectedDate}
               eventsByDate={eventsByDate}
+              onEventDoubleClick={(event) => {
+                setEventToEdit(event);
+                setShowEventDialog(true);
+              }}
+              onDayDoubleClick={(date) => {
+                setSelectedDate(date);
+                setEventToEdit(undefined);
+                setShowEventDialog(true);
+              }}
             />
           </Card>
 
