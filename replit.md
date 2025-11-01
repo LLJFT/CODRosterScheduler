@@ -10,12 +10,21 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **Full Arabic Localization** (November 1, 2025): Converted entire UI to Arabic with RTL support
+  - All user-facing text translated to Arabic including buttons, labels, form fields, and toast messages
+  - Role names localized: Tank→دبابة, DPS→مهاجم, Support→دعم, Sub→بديل, Coach→مدرب
+  - Day names in Arabic: Monday→الاثنين, Tuesday→الثلاثاء, Wednesday→الأربعاء, etc.
+  - Availability options: unknown→غير معروف, All blocks→كل الأوقات, cannot→غير متاح
+  - RTL direction applied via dir="rtl" on html element for proper right-to-left layout
+- **Color Theme Update** (November 1, 2025): Changed from pink/purple to yellow/black color scheme
+  - Primary color changed to yellow (HSL 45-48°) for light and dark themes
+  - Maintained Material Design principles with new palette
+  - All color tokens updated in index.css for consistent theming
 - **Dynamic Google Sheets Creation** (November 1, 2025): Implemented automatic spreadsheet creation per user
   - Removed hardcoded spreadsheet ID (was: 1W0wvf6RODd-fcJ2mFh89LyyN3RKCaxp-_DaR74cHKjA)
   - System now creates a unique "Marvel Rivals Team Schedule" spreadsheet on first save
   - Spreadsheet ID stored in new `settings` database table for reuse across sessions
   - Share button provides user's own Google Sheets link dynamically via /api/spreadsheet-info endpoint
-- **Language Conversion** (November 1, 2025): Converted entire UI from Arabic (RTL) to English (LTR)
 - **Share Functionality Update** (November 1, 2025): Share button now copies Google Sheets link instead of Replit app URL
 
 ## System Architecture
