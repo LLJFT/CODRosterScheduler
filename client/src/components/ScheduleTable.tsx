@@ -33,11 +33,11 @@ const availabilityColors: Record<AvailabilityOption, string> = {
 };
 
 const availabilityDisplayText: Record<AvailabilityOption, string> = {
-  "unknown": "غير معروف",
+  "unknown": "Unknown",
   "18:00-20:00 CEST": "18:00-20:00",
   "20:00-22:00 CEST": "20:00-22:00",
-  "All blocks": "كل الأوقات",
-  "cannot": "غير متاح",
+  "All blocks": "All blocks",
+  "cannot": "Cannot",
 };
 
 export function ScheduleTable({ scheduleData, onAvailabilityChange, isLoading }: ScheduleTableProps) {
@@ -72,11 +72,11 @@ export function ScheduleTable({ scheduleData, onAvailabilityChange, isLoading }:
         <table className="w-full border-collapse">
           <thead>
             <tr className="bg-primary text-primary-foreground">
-              <th className="border-r border-primary-border px-4 py-3 text-right text-sm font-semibold uppercase tracking-wide">
-                الدور
+              <th className="border-r border-primary-border px-4 py-3 text-left text-sm font-semibold uppercase tracking-wide">
+                Role
               </th>
-              <th className="border-r border-primary-border px-4 py-3 text-right text-sm font-semibold uppercase tracking-wide min-w-[140px]">
-                اللاعب
+              <th className="border-r border-primary-border px-4 py-3 text-left text-sm font-semibold uppercase tracking-wide min-w-[140px]">
+                Player
               </th>
               {dayOfWeek.map((day) => (
                 <th
@@ -84,13 +84,13 @@ export function ScheduleTable({ scheduleData, onAvailabilityChange, isLoading }:
                   className="border-r border-primary-border px-3 py-3 text-center text-sm font-semibold uppercase tracking-wide min-w-[160px] last:border-r-0"
                   data-testid={`header-${day.toLowerCase()}`}
                 >
-                  {day === "Monday" && "الإثنين"}
-                  {day === "Tuesday" && "الثلاثاء"}
-                  {day === "Wednesday" && "الأربعاء"}
-                  {day === "Thursday" && "الخميس"}
-                  {day === "Friday" && "الجمعة"}
-                  {day === "Saturday" && "السبت"}
-                  {day === "Sunday" && "الأحد"}
+                  {day === "Monday" && "Monday"}
+                  {day === "Tuesday" && "Tuesday"}
+                  {day === "Wednesday" && "Wednesday"}
+                  {day === "Thursday" && "Thursday"}
+                  {day === "Friday" && "Friday"}
+                  {day === "Saturday" && "Saturday"}
+                  {day === "Sunday" && "Sunday"}
                 </th>
               ))}
             </tr>
@@ -172,7 +172,7 @@ export function ScheduleTable({ scheduleData, onAvailabilityChange, isLoading }:
       </div>
       {scheduleData.length === 0 && (
         <div className="py-12 text-center">
-          <p className="text-muted-foreground text-sm">لا يوجد لاعبين في الجدول</p>
+          <p className="text-muted-foreground text-sm">No players in schedule</p>
         </div>
       )}
     </div>

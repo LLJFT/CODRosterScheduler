@@ -17,13 +17,13 @@ interface TimeSlotAnalysis {
 }
 
 const dayDisplayNames: Record<DayOfWeek, string> = {
-  Monday: "الإثنين",
-  Tuesday: "الثلاثاء",
-  Wednesday: "الأربعاء",
-  Thursday: "الخميس",
-  Friday: "الجمعة",
-  Saturday: "السبت",
-  Sunday: "الأحد",
+  Monday: "Monday",
+  Tuesday: "Tuesday",
+  Wednesday: "Wednesday",
+  Thursday: "Thursday",
+  Friday: "Friday",
+  Saturday: "Saturday",
+  Sunday: "Sunday",
 };
 
 export function AvailabilityAnalytics({ scheduleData }: AvailabilityAnalyticsProps) {
@@ -90,7 +90,7 @@ export function AvailabilityAnalytics({ scheduleData }: AvailabilityAnalyticsPro
         <div className="text-center py-8">
           <Clock className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
           <p className="text-muted-foreground">
-            لا يوجد بيانات كافية لعرض التحليلات. يرجى إضافة توفر اللاعبين.
+            Not enough data to show analytics. Please add player availability.
           </p>
         </div>
       </Card>
@@ -105,9 +105,9 @@ export function AvailabilityAnalytics({ scheduleData }: AvailabilityAnalyticsPro
             <TrendingUp className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-foreground">تحليلات التوفر</h3>
+            <h3 className="text-lg font-semibold text-foreground">Availability Analytics</h3>
             <p className="text-sm text-muted-foreground">
-              أفضل الأوقات للتدريبات بناءً على توفر اللاعبين
+              Best training times based on player availability
             </p>
           </div>
         </div>
@@ -117,7 +117,7 @@ export function AvailabilityAnalytics({ scheduleData }: AvailabilityAnalyticsPro
             <div className="flex items-center gap-2 mb-2">
               <Users className="h-4 w-4 text-accent-foreground" />
               <span className="text-sm font-medium text-accent-foreground">
-                اليوم الأكثر ملاءمة
+                Most Available Day
               </span>
             </div>
             <div className="flex items-center gap-3">
@@ -125,7 +125,7 @@ export function AvailabilityAnalytics({ scheduleData }: AvailabilityAnalyticsPro
                 {dayDisplayNames[mostAvailableDay.day]}
               </span>
               <Badge variant="secondary" className="text-xs">
-                {mostAvailableDay.count} من {scheduleData.length} لاعب متاح
+                {mostAvailableDay.count} of {scheduleData.length} players available
               </Badge>
             </div>
           </div>
@@ -133,7 +133,7 @@ export function AvailabilityAnalytics({ scheduleData }: AvailabilityAnalyticsPro
 
         <div className="space-y-3">
           <h4 className="text-sm font-semibold text-foreground mb-3">
-            أفضل الأوقات المقترحة للتدريب
+            Recommended Training Times
           </h4>
 
           {bestTimes.map((slot, index) => (
@@ -186,7 +186,7 @@ export function AvailabilityAnalytics({ scheduleData }: AvailabilityAnalyticsPro
 
               {slot.availablePlayers.length > 0 && (
                 <div className="mt-2">
-                  <p className="text-xs text-muted-foreground mb-1.5">اللاعبون المتاحون:</p>
+                  <p className="text-xs text-muted-foreground mb-1.5">Available players:</p>
                   <div className="flex flex-wrap gap-1.5">
                     {slot.availablePlayers.map((playerName) => (
                       <Badge key={playerName} variant="secondary" className="text-xs">
@@ -201,7 +201,7 @@ export function AvailabilityAnalytics({ scheduleData }: AvailabilityAnalyticsPro
 
           {bestTimes.length === 0 && (
             <p className="text-sm text-muted-foreground text-center py-4">
-              لا توجد أوقات تدريب مقترحة حالياً
+              No recommended training times available
             </p>
           )}
         </div>

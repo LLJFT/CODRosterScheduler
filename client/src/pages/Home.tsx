@@ -10,7 +10,6 @@ import { AvailabilityAnalytics } from "@/components/AvailabilityAnalytics";
 import { SimpleToast } from "@/components/SimpleToast";
 import { Save, Share2, Download } from "lucide-react";
 import { startOfWeek, endOfWeek, format } from "date-fns";
-import { ar } from "date-fns/locale";
 import type { PlayerAvailability, DayOfWeek, AvailabilityOption, RoleType } from "@shared/schema";
 import { dayOfWeek } from "@shared/schema";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -63,13 +62,13 @@ export default function Home() {
       setHasChanges(false);
       setLastSyncTime(new Date());
       console.log("[Save Mutation] Showing success toast");
-      setToastMessage("تم الحفظ بنجاح في Google Sheets");
+      setToastMessage("Saved successfully to Google Sheets");
       setToastType("success");
       setShowToast(true);
     },
     onError: (error: any) => {
       console.log("[Save Mutation] onError called:", error);
-      setToastMessage(error.message || "حدث خطأ أثناء الحفظ");
+      setToastMessage(error.message || "Error saving schedule");
       setToastType("error");
       setShowToast(true);
     },
@@ -77,7 +76,7 @@ export default function Home() {
 
   const handleWeekChange = (start: Date, end: Date) => {
     if (hasChanges) {
-      const confirm = window.confirm("لديك تغييرات غير محفوظة. هل تريد المتابعة؟");
+      const confirm = window.confirm("You have unsaved changes. Do you want to continue?");
       if (!confirm) return;
     }
     setWeekStart(start);
@@ -114,7 +113,7 @@ export default function Home() {
     };
     setScheduleData((prev) => [...prev, newPlayer]);
     setHasChanges(true);
-    setToastMessage(`تم إضافة ${name} إلى الجدول`);
+    setToastMessage(`Added ${name} to schedule`);
     setToastType("success");
     setShowToast(true);
   };
@@ -122,12 +121,12 @@ export default function Home() {
   const handleRemovePlayer = (playerId: string) => {
     const player = scheduleData.find((p) => p.playerId === playerId);
     if (player) {
-      const confirm = window.confirm(`هل تريد حذف ${player.playerName}؟`);
+      const confirm = window.confirm(`Do you want to remove ${player.playerName}?`);
       if (!confirm) return;
       
       setScheduleData((prev) => prev.filter((p) => p.playerId !== playerId));
       setHasChanges(true);
-      setToastMessage(`تم حذف ${player.playerName} من الجدول`);
+      setToastMessage(`Removed ${player.playerName} from schedule`);
       setToastType("success");
       setShowToast(true);
     }
@@ -135,13 +134,14 @@ export default function Home() {
 
   const handleShare = async () => {
     try {
-      const url = window.location.href;
+      const SPREADSHEET_ID = '1W0wvf6RODd-fcJ2mFh89LyyN3RKCaxp-_DaR74cHKjA';
+      const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/edit#gid=0`;
       await navigator.clipboard.writeText(url);
-      setToastMessage("تم نسخ الرابط إلى الحافظة");
+      setToastMessage("Google Sheets link copied to clipboard");
       setToastType("success");
       setShowToast(true);
     } catch (error) {
-      setToastMessage("فشل نسخ الرابط");
+      setToastMessage("Failed to copy link");
       setToastType("error");
       setShowToast(true);
     }
@@ -196,7 +196,7 @@ export default function Home() {
                 data-testid="button-share"
               >
                 <Share2 className="h-4 w-4" />
-                مشاركة
+                Share
               </Button>
               <Button
                 variant="outline"
@@ -205,7 +205,7 @@ export default function Home() {
                 data-testid="button-export"
               >
                 <Download className="h-4 w-4" />
-                تصدير
+                Export
               </Button>
               <Button
                 variant="default"
@@ -215,7 +215,7 @@ export default function Home() {
                 data-testid="button-save"
               >
                 <Save className="h-4 w-4" />
-                {saveMutation.isPending ? "جاري الحفظ..." : "حفظ"}
+                {saveMutation.isPending ? "Saving..." : "Save"}
               </Button>
             </div>
           </div>
@@ -224,7 +224,7 @@ export default function Home() {
             <div className="flex items-center justify-center py-20">
               <div className="text-center space-y-3">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-                <p className="text-muted-foreground">جاري التحميل...</p>
+                <p className="text-muted-foreground">Loading...</p>
               </div>
             </div>
           ) : (
@@ -244,7 +244,7 @@ export default function Home() {
           {hasChanges && (
             <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
               <div className="bg-primary text-primary-foreground px-6 py-3 rounded-lg shadow-lg flex items-center gap-3">
-                <span className="text-sm font-medium">لديك تغييرات غير محفوظة</span>
+                <span className="text-sm font-medium">You have unsaved changes</span>
                 <Button
                   size="sm"
                   variant="secondary"
@@ -252,7 +252,7 @@ export default function Home() {
                   disabled={saveMutation.isPending}
                   data-testid="button-save-floating"
                 >
-                  حفظ الآن
+                  Save Now
                 </Button>
               </div>
             </div>

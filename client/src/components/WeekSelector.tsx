@@ -4,7 +4,6 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ChevronLeft, ChevronRight, CalendarIcon } from "lucide-react";
 import { format, addWeeks, startOfWeek, endOfWeek } from "date-fns";
-import { ar } from "date-fns/locale";
 
 interface WeekSelectorProps {
   weekStart: Date;
@@ -37,7 +36,7 @@ export function WeekSelector({ weekStart, weekEnd, onWeekChange }: WeekSelectorP
   };
 
   const formatDate = (date: Date) => {
-    return format(date, "dd.MM", { locale: ar });
+    return format(date, "dd.MM");
   };
 
   return (
@@ -71,7 +70,6 @@ export function WeekSelector({ weekStart, weekEnd, onWeekChange }: WeekSelectorP
             selected={weekStart}
             onSelect={handleDateSelect}
             initialFocus
-            locale={ar}
           />
         </PopoverContent>
       </Popover>
