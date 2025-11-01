@@ -325,7 +325,7 @@ export default function Events() {
       {showEventDialog && (
         <EventDialog
           open={showEventDialog}
-          onOpenChange={(open) => {
+          onOpenChange={(open: boolean) => {
             setShowEventDialog(open);
             if (!open) {
               setEventToEdit(undefined);
