@@ -24,11 +24,13 @@ Preferred communication style: Simple, everyday language.
     - Tank rows: Light blue (#ADD8E6) - RGB(0.678, 0.847, 0.902)
     - DPS rows: Light pink/red (#FFC0CB) - RGB(1, 0.753, 0.796)
     - Support rows: Light green (#90EE90) - RGB(0.565, 0.933, 0.565)
+  - **Strong black borders** around all cells (RGB 0, 0, 0) for professional look
   - Bold text for Role column
   - Players automatically sorted by role (Tank → DPS → Support)
   - Time slot dropdowns (unknown, 18:00-20:00 CEST, 20:00-22:00 CEST, All blocks, cannot)
   - Role dropdowns (Tank, DPS, Support) in column A
   - Prevents manual entry errors in shared spreadsheets
+  - **Note**: Dropdown styling is controlled by Google Sheets and cannot be customized via API
 - **Professional Google Sheets Formatting** (November 1, 2025): Implemented beautiful formatting for exported schedules
   - Golden header row (RGB 1, 0.85, 0) with bold text matching app theme
   - Merged title row with centered text and border
