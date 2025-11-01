@@ -1,4 +1,5 @@
 import { google } from 'googleapis';
+import { storage } from './storage';
 
 let connectionSettings: any;
 
@@ -47,14 +48,41 @@ export async function getUncachableGoogleSheetClient() {
   return google.sheets({ version: 'v4', auth: oauth2Client });
 }
 
-const SPREADSHEET_ID = '1W0wvf6RODd-fcJ2mFh89LyyN3RKCaxp-_DaR74cHKjA';
+async function getOrCreateSpreadsheet(): Promise<string> {
+  const existingId = await storage.getSetting('google_spreadsheet_id');
+  
+  if (existingId) {
+    return existingId;
+  }
+
+  const sheets = await getUncachableGoogleSheetClient();
+  
+  const spreadsheet = await sheets.spreadsheets.create({
+    requestBody: {
+      properties: {
+        title: 'Marvel Rivals Team Schedule',
+      },
+    },
+  });
+
+  const spreadsheetId = spreadsheet.data.spreadsheetId!;
+  
+  await storage.setSetting('google_spreadsheet_id', spreadsheetId);
+  
+  return spreadsheetId;
+}
+
+export async function getSpreadsheetId(): Promise<string> {
+  return await getOrCreateSpreadsheet();
+}
 
 export async function readScheduleFromSheet(sheetName: string) {
   try {
+    const spreadsheetId = await getOrCreateSpreadsheet();
     const sheets = await getUncachableGoogleSheetClient();
     
     const response = await sheets.spreadsheets.values.get({
-      spreadsheetId: SPREADSHEET_ID,
+      spreadsheetId,
       range: `${sheetName}!A1:I50`,
     });
 
@@ -67,18 +95,19 @@ export async function readScheduleFromSheet(sheetName: string) {
 
 export async function writeScheduleToSheet(sheetName: string, data: any[][]) {
   try {
+    const spreadsheetId = await getOrCreateSpreadsheet();
     const sheets = await getUncachableGoogleSheetClient();
     
     try {
       await sheets.spreadsheets.get({
-        spreadsheetId: SPREADSHEET_ID,
+        spreadsheetId,
       });
     } catch {
       throw new Error('Cannot access spreadsheet. Please check permissions.');
     }
 
     const allSheets = await sheets.spreadsheets.get({
-      spreadsheetId: SPREADSHEET_ID,
+      spreadsheetId,
     });
 
     const sheetExists = allSheets.data.sheets?.some(
@@ -87,7 +116,7 @@ export async function writeScheduleToSheet(sheetName: string, data: any[][]) {
 
     if (!sheetExists) {
       await sheets.spreadsheets.batchUpdate({
-        spreadsheetId: SPREADSHEET_ID,
+        spreadsheetId,
         requestBody: {
           requests: [
             {
@@ -103,12 +132,12 @@ export async function writeScheduleToSheet(sheetName: string, data: any[][]) {
     }
 
     await sheets.spreadsheets.values.clear({
-      spreadsheetId: SPREADSHEET_ID,
+      spreadsheetId,
       range: `${sheetName}!A1:Z100`,
     });
 
     await sheets.spreadsheets.values.update({
-      spreadsheetId: SPREADSHEET_ID,
+      spreadsheetId,
       range: `${sheetName}!A1`,
       valueInputOption: 'RAW',
       requestBody: {

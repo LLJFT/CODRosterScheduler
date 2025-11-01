@@ -37,11 +37,21 @@ export const schedules = pgTable("schedules", {
   googleSheetId: text("google_sheet_id"),
 });
 
+export const settings = pgTable("settings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  key: text("key").notNull().unique(),
+  value: text("value").notNull(),
+});
+
 export const insertPlayerSchema = createInsertSchema(players).omit({
   id: true,
 });
 
 export const insertScheduleSchema = createInsertSchema(schedules).omit({
+  id: true,
+});
+
+export const insertSettingSchema = createInsertSchema(settings).omit({
   id: true,
 });
 
@@ -54,6 +64,9 @@ export type InsertPlayer = z.infer<typeof insertPlayerSchema>;
 
 export type Schedule = typeof schedules.$inferSelect;
 export type InsertSchedule = z.infer<typeof insertScheduleSchema>;
+
+export type Setting = typeof settings.$inferSelect;
+export type InsertSetting = z.infer<typeof insertSettingSchema>;
 
 export interface PlayerAvailability {
   playerId: string;

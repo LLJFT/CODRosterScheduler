@@ -134,13 +134,19 @@ export default function Home() {
 
   const handleShare = async () => {
     try {
-      const SPREADSHEET_ID = '1W0wvf6RODd-fcJ2mFh89LyyN3RKCaxp-_DaR74cHKjA';
-      const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/edit#gid=0`;
-      await navigator.clipboard.writeText(url);
+      const response = await fetch('/api/spreadsheet-info');
+      const data = await response.json();
+      
+      if (!response.ok || !data.url) {
+        throw new Error('Failed to get spreadsheet URL');
+      }
+      
+      await navigator.clipboard.writeText(data.url);
       setToastMessage("Google Sheets link copied to clipboard");
       setToastType("success");
       setShowToast(true);
     } catch (error) {
+      console.error('Share error:', error);
       setToastMessage("Failed to copy link");
       setToastType("error");
       setShowToast(true);

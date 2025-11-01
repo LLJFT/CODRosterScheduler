@@ -6,7 +6,8 @@ import {
   readScheduleFromSheet, 
   writeScheduleToSheet, 
   convertScheduleToSheetData,
-  convertSheetDataToSchedule 
+  convertSheetDataToSchedule,
+  getSpreadsheetId
 } from "./google-sheets";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -97,6 +98,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(players);
     } catch (error: any) {
       console.error('Error in GET /api/players:', error);
+      res.status(500).json({ error: error.message || "Internal server error" });
+    }
+  });
+
+  app.get("/api/spreadsheet-info", async (req, res) => {
+    try {
+      const spreadsheetId = await getSpreadsheetId();
+      const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit#gid=0`;
+      res.json({ spreadsheetId, url });
+    } catch (error: any) {
+      console.error('Error in GET /api/spreadsheet-info:', error);
       res.status(500).json({ error: error.message || "Internal server error" });
     }
   });

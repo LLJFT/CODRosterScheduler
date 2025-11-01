@@ -1,5 +1,5 @@
-import type { Player, InsertPlayer, Schedule, InsertSchedule } from "@shared/schema";
-import { players, schedules } from "@shared/schema";
+import type { Player, InsertPlayer, Schedule, InsertSchedule, Setting, InsertSetting } from "@shared/schema";
+import { players, schedules, settings } from "@shared/schema";
 import { db } from "./db";
 import { eq, and } from "drizzle-orm";
 
@@ -9,6 +9,8 @@ export interface IStorage {
   getAllPlayers(): Promise<Player[]>;
   addPlayer(player: InsertPlayer): Promise<Player>;
   removePlayer(id: string): Promise<boolean>;
+  getSetting(key: string): Promise<string | null>;
+  setSetting(key: string, value: string): Promise<Setting>;
 }
 
 export class DbStorage implements IStorage {
@@ -74,6 +76,37 @@ export class DbStorage implements IStorage {
       .returning();
 
     return deleted.length > 0;
+  }
+
+  async getSetting(key: string): Promise<string | null> {
+    const result = await db
+      .select()
+      .from(settings)
+      .where(eq(settings.key, key))
+      .limit(1);
+
+    return result[0]?.value ?? null;
+  }
+
+  async setSetting(key: string, value: string): Promise<Setting> {
+    const existing = await this.getSetting(key);
+
+    if (existing !== null) {
+      const updated = await db
+        .update(settings)
+        .set({ value })
+        .where(eq(settings.key, key))
+        .returning();
+
+      return updated[0];
+    }
+
+    const inserted = await db
+      .insert(settings)
+      .values({ key, value })
+      .returning();
+
+    return inserted[0];
   }
 }
 
