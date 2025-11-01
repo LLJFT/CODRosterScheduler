@@ -11,7 +11,7 @@ export const availabilityOptions = [
   "cannot"
 ] as const;
 
-export const roleTypes = ["Tank", "DPS", "Support", "Sub", "Coach"] as const;
+export const roleTypes = ["Tank", "DPS", "Support"] as const;
 
 export const dayOfWeek = [
   "Monday",

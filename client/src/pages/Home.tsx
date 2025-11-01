@@ -132,6 +132,20 @@ export default function Home() {
     }
   };
 
+  const handleEditPlayer = (playerId: string, name: string, role: RoleType) => {
+    setScheduleData((prev) =>
+      prev.map((player) =>
+        player.playerId === playerId
+          ? { ...player, playerName: name, role }
+          : player
+      )
+    );
+    setHasChanges(true);
+    setToastMessage(`Updated ${name}`);
+    setToastType("success");
+    setShowToast(true);
+  };
+
   const handleShare = async () => {
     try {
       const response = await fetch('/api/spreadsheet-info');
@@ -194,6 +208,7 @@ export default function Home() {
                 players={scheduleData}
                 onAddPlayer={handleAddPlayer}
                 onRemovePlayer={handleRemovePlayer}
+                onEditPlayer={handleEditPlayer}
               />
               <Button
                 variant="outline"

@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Pencil } from "lucide-react";
 import { roleTypes, type RoleType } from "@shared/schema";
 import type { PlayerAvailability } from "@shared/schema";
 import { Badge } from "@/components/ui/badge";
@@ -27,40 +27,59 @@ interface PlayerManagerProps {
   players: PlayerAvailability[];
   onAddPlayer: (name: string, role: RoleType) => void;
   onRemovePlayer: (playerId: string) => void;
+  onEditPlayer: (playerId: string, name: string, role: RoleType) => void;
 }
 
 const roleColors: Record<string, string> = {
   Tank: "bg-blue-500/10 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 border-blue-500/20",
   DPS: "bg-red-500/10 text-red-700 dark:bg-red-500/20 dark:text-red-300 border-red-500/20",
   Support: "bg-green-500/10 text-green-700 dark:bg-green-500/20 dark:text-green-300 border-green-500/20",
-  Sub: "bg-yellow-500/10 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-300 border-yellow-500/20",
-  Coach: "bg-purple-500/10 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300 border-purple-500/20",
 };
 
 const roleDisplayNames: Record<RoleType, string> = {
   Tank: "Tank",
   DPS: "DPS",
   Support: "Support",
-  Sub: "Sub",
-  Coach: "Coach",
 };
 
-export function PlayerManager({ players, onAddPlayer, onRemovePlayer }: PlayerManagerProps) {
+export function PlayerManager({ players, onAddPlayer, onRemovePlayer, onEditPlayer }: PlayerManagerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [newPlayerName, setNewPlayerName] = useState("");
   const [newPlayerRole, setNewPlayerRole] = useState<RoleType>("Tank");
+  const [editingPlayer, setEditingPlayer] = useState<PlayerAvailability | null>(null);
 
   const handleAddPlayer = () => {
     if (newPlayerName.trim()) {
-      onAddPlayer(newPlayerName.trim(), newPlayerRole);
+      if (editingPlayer) {
+        onEditPlayer(editingPlayer.playerId, newPlayerName.trim(), newPlayerRole);
+        setEditingPlayer(null);
+      } else {
+        onAddPlayer(newPlayerName.trim(), newPlayerRole);
+      }
       setNewPlayerName("");
       setNewPlayerRole("Tank");
       setIsOpen(false);
     }
   };
 
+  const handleEditClick = (player: PlayerAvailability) => {
+    setEditingPlayer(player);
+    setNewPlayerName(player.playerName);
+    setNewPlayerRole(player.role);
+    setIsOpen(true);
+  };
+
+  const handleDialogClose = (open: boolean) => {
+    setIsOpen(open);
+    if (!open) {
+      setEditingPlayer(null);
+      setNewPlayerName("");
+      setNewPlayerRole("Tank");
+    }
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={handleDialogClose}>
       <DialogTrigger asChild>
         <Button variant="default" className="gap-2" data-testid="button-add-player">
           <Plus className="h-4 w-4" />
@@ -69,9 +88,9 @@ export function PlayerManager({ players, onAddPlayer, onRemovePlayer }: PlayerMa
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Manage Players</DialogTitle>
+          <DialogTitle>{editingPlayer ? 'Edit Player' : 'Manage Players'}</DialogTitle>
           <DialogDescription>
-            Add new players or remove existing ones
+            {editingPlayer ? 'Edit player information' : 'Add new players or remove existing ones'}
           </DialogDescription>
         </DialogHeader>
 
@@ -111,12 +130,21 @@ export function PlayerManager({ players, onAddPlayer, onRemovePlayer }: PlayerMa
               className="w-full"
               data-testid="button-confirm-add-player"
             >
-              <Plus className="h-4 w-4 mr-2" />
-              Add Player
+              {editingPlayer ? (
+                <>
+                  <Pencil className="h-4 w-4 mr-2" />
+                  Update Player
+                </>
+              ) : (
+                <>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Player
+                </>
+              )}
             </Button>
           </div>
 
-          {players.length > 0 && (
+          {!editingPlayer && players.length > 0 && (
             <div className="space-y-2">
               <Label>Current Players</Label>
               <div className="max-h-[300px] overflow-y-auto space-y-2 rounded-md border border-border p-3">
@@ -132,15 +160,26 @@ export function PlayerManager({ players, onAddPlayer, onRemovePlayer }: PlayerMa
                       </Badge>
                       <span className="text-sm font-medium">{player.playerName}</span>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onRemovePlayer(player.playerId)}
-                      className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                      data-testid={`button-remove-player-${player.playerId}`}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEditClick(player)}
+                        className="h-8 w-8"
+                        data-testid={`button-edit-player-${player.playerId}`}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onRemovePlayer(player.playerId)}
+                        className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                        data-testid={`button-remove-player-${player.playerId}`}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>

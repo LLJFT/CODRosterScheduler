@@ -283,6 +283,56 @@ export async function writeScheduleToSheet(sheetName: string, data: any[][]) {
               fields: 'gridProperties.frozenRowCount',
             },
           },
+          // Add data validation for availability columns (Monday-Sunday, columns C-I)
+          {
+            setDataValidation: {
+              range: {
+                sheetId: sheetId,
+                startRowIndex: 3, // Start from row 4 (data rows)
+                endRowIndex: Math.max(numRows, 50), // Apply to current rows + extra buffer
+                startColumnIndex: 2, // Column C (Monday)
+                endColumnIndex: 9, // Column I (Sunday)
+              },
+              rule: {
+                condition: {
+                  type: 'ONE_OF_LIST',
+                  values: [
+                    { userEnteredValue: 'unknown' },
+                    { userEnteredValue: '18:00-20:00 CEST' },
+                    { userEnteredValue: '20:00-22:00 CEST' },
+                    { userEnteredValue: 'All blocks' },
+                    { userEnteredValue: 'cannot' },
+                  ],
+                },
+                showCustomUi: true,
+                strict: true,
+              },
+            },
+          },
+          // Add data validation for Role column (column A)
+          {
+            setDataValidation: {
+              range: {
+                sheetId: sheetId,
+                startRowIndex: 3, // Start from row 4 (data rows)
+                endRowIndex: Math.max(numRows, 50), // Apply to current rows + extra buffer
+                startColumnIndex: 0, // Column A (Role)
+                endColumnIndex: 1, // Column A only
+              },
+              rule: {
+                condition: {
+                  type: 'ONE_OF_LIST',
+                  values: [
+                    { userEnteredValue: 'Tank' },
+                    { userEnteredValue: 'DPS' },
+                    { userEnteredValue: 'Support' },
+                  ],
+                },
+                showCustomUi: true,
+                strict: true,
+              },
+            },
+          },
         ],
       },
     });
