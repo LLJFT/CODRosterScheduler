@@ -29,7 +29,18 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const res = await fetch(queryKey.join("/") as string, {
+    let url: string;
+    
+    if (queryKey.length === 1) {
+      url = queryKey[0] as string;
+    } else if (queryKey[0] === "/api/schedule" && queryKey.length === 3) {
+      const [path, weekStart, weekEnd] = queryKey;
+      url = `${path}?weekStartDate=${weekStart}&weekEndDate=${weekEnd}`;
+    } else {
+      url = queryKey.join("/") as string;
+    }
+
+    const res = await fetch(url, {
       credentials: "include",
     });
 

@@ -23,10 +23,11 @@ export default function Home() {
   const [hasChanges, setHasChanges] = useState(false);
   const [lastSyncTime, setLastSyncTime] = useState<Date>();
 
-  const weekKey = `${format(weekStart, "yyyy-MM-dd")}_${format(weekEnd, "yyyy-MM-dd")}`;
+  const weekStartStr = format(weekStart, "yyyy-MM-dd");
+  const weekEndStr = format(weekEnd, "yyyy-MM-dd");
 
   const { data: fetchedSchedule, isLoading } = useQuery({
-    queryKey: ["/api/schedule", weekKey],
+    queryKey: ["/api/schedule", weekStartStr, weekEndStr],
   });
 
   useEffect(() => {
@@ -39,11 +40,12 @@ export default function Home() {
 
   const saveMutation = useMutation({
     mutationFn: async () => {
-      return await apiRequest("POST", "/api/schedule", {
-        weekStartDate: format(weekStart, "yyyy-MM-dd"),
-        weekEndDate: format(weekEnd, "yyyy-MM-dd"),
+      const response = await apiRequest("POST", "/api/schedule", {
+        weekStartDate: weekStartStr,
+        weekEndDate: weekEndStr,
         scheduleData: { players: scheduleData },
       });
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/schedule"] });
