@@ -16,10 +16,13 @@ Preferred communication style: Simple, everyday language.
   - Day names in Arabic: Monday→الاثنين, Tuesday→الثلاثاء, Wednesday→الأربعاء, etc.
   - Availability options: unknown→غير معروف, All blocks→كل الأوقات, cannot→غير متاح
   - RTL direction applied via dir="rtl" on html element for proper right-to-left layout
-- **Color Theme Update** (November 1, 2025): Changed from pink/purple to yellow/black color scheme
-  - Primary color changed to yellow (HSL 45-48°) for light and dark themes
-  - Maintained Material Design principles with new palette
-  - All color tokens updated in index.css for consistent theming
+- **Golden Color Theme** (November 1, 2025): Implemented bright golden yellow and black color scheme
+  - Primary color: HSL 51 100% 50% (bright golden yellow #FFD700)
+  - Dark mode background: HSL 0 0% 5% (nearly pure black)
+  - Dark mode text/foreground: HSL 51 100% 50% (golden yellow)
+  - Dark mode borders: HSL 51 100% 30% (darker golden yellow for contrast)
+  - Design matches Marvel Rivals esports branding with bold golden accents on black
+  - All color tokens updated in index.css for consistent theming across all components
 - **Dynamic Google Sheets Creation** (November 1, 2025): Implemented automatic spreadsheet creation per user
   - Removed hardcoded spreadsheet ID (was: 1W0wvf6RODd-fcJ2mFh89LyyN3RKCaxp-_DaR74cHKjA)
   - System now creates a unique "Marvel Rivals Team Schedule" spreadsheet on first save
