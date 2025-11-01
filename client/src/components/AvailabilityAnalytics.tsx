@@ -57,7 +57,8 @@ export function AvailabilityAnalytics({ scheduleData }: AvailabilityAnalyticsPro
 
   const getBestTrainingTimes = (): TimeSlotAnalysis[] => {
     const allSlots = analyzeTimeSlots();
-    return allSlots.filter(slot => slot.availableCount >= scheduleData.length * 0.5).slice(0, 5);
+    // Show slots where at least 1 player is available, sorted by most available
+    return allSlots.filter(slot => slot.availableCount > 0).slice(0, 5);
   };
 
   const getMostAvailableDay = (): { day: DayOfWeek; count: number } | null => {

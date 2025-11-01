@@ -7,17 +7,19 @@ import { PlayerManager } from "@/components/PlayerManager";
 import { SyncStatus } from "@/components/SyncStatus";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { AvailabilityAnalytics } from "@/components/AvailabilityAnalytics";
+import { SimpleToast } from "@/components/SimpleToast";
 import { Save, Share2, Download } from "lucide-react";
 import { startOfWeek, endOfWeek, format } from "date-fns";
 import { ar } from "date-fns/locale";
 import type { PlayerAvailability, DayOfWeek, AvailabilityOption, RoleType } from "@shared/schema";
 import { dayOfWeek } from "@shared/schema";
-import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { nanoid } from "nanoid";
 
 export default function Home() {
-  const { toast } = useToast();
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState<"success" | "error">("success");
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }));
   const [weekEnd, setWeekEnd] = useState(() => endOfWeek(new Date(), { weekStartsOn: 1 }));
   const [scheduleData, setScheduleData] = useState<PlayerAvailability[]>([]);
@@ -45,28 +47,31 @@ export default function Home() {
 
   const saveMutation = useMutation({
     mutationFn: async () => {
+      console.log("[Save Mutation] Starting save...");
       const response = await apiRequest("POST", "/api/schedule", {
         weekStartDate: weekStartStr,
         weekEndDate: weekEndStr,
         scheduleData: { players: scheduleData },
       });
-      return response.json();
+      const data = await response.json();
+      console.log("[Save Mutation] Save completed:", data);
+      return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("[Save Mutation] onSuccess called with data:", data);
       queryClient.invalidateQueries({ queryKey: ["/api/schedule"] });
       setHasChanges(false);
       setLastSyncTime(new Date());
-      toast({
-        title: "تم الحفظ بنجاح",
-        description: "تم حفظ الجدول في Google Sheets",
-      });
+      console.log("[Save Mutation] Showing success toast");
+      setToastMessage("تم الحفظ بنجاح في Google Sheets");
+      setToastType("success");
+      setShowToast(true);
     },
     onError: (error: any) => {
-      toast({
-        title: "خطأ في الحفظ",
-        description: error.message || "حدث خطأ أثناء الحفظ",
-        variant: "destructive",
-      });
+      console.log("[Save Mutation] onError called:", error);
+      setToastMessage(error.message || "حدث خطأ أثناء الحفظ");
+      setToastType("error");
+      setShowToast(true);
     },
   });
 
@@ -109,10 +114,9 @@ export default function Home() {
     };
     setScheduleData((prev) => [...prev, newPlayer]);
     setHasChanges(true);
-    toast({
-      title: "تمت الإضافة",
-      description: `تم إضافة ${name} إلى الجدول`,
-    });
+    setToastMessage(`تم إضافة ${name} إلى الجدول`);
+    setToastType("success");
+    setShowToast(true);
   };
 
   const handleRemovePlayer = (playerId: string) => {
@@ -123,10 +127,9 @@ export default function Home() {
       
       setScheduleData((prev) => prev.filter((p) => p.playerId !== playerId));
       setHasChanges(true);
-      toast({
-        title: "تم الحذف",
-        description: `تم حذف ${player.playerName} من الجدول`,
-      });
+      setToastMessage(`تم حذف ${player.playerName} من الجدول`);
+      setToastType("success");
+      setShowToast(true);
     }
   };
 
@@ -134,16 +137,13 @@ export default function Home() {
     try {
       const url = window.location.href;
       await navigator.clipboard.writeText(url);
-      toast({
-        title: "تم النسخ",
-        description: "تم نسخ الرابط إلى الحافظة",
-      });
+      setToastMessage("تم نسخ الرابط إلى الحافظة");
+      setToastType("success");
+      setShowToast(true);
     } catch (error) {
-      toast({
-        title: "خطأ",
-        description: "فشل نسخ الرابط",
-        variant: "destructive",
-      });
+      setToastMessage("فشل نسخ الرابط");
+      setToastType("error");
+      setShowToast(true);
     }
   };
 
@@ -259,6 +259,14 @@ export default function Home() {
           )}
         </div>
       </div>
+
+      {showToast && (
+        <SimpleToast
+          message={toastMessage}
+          type={toastType}
+          onClose={() => setShowToast(false)}
+        />
+      )}
 
       <style>{`
         @media print {
