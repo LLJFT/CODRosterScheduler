@@ -27,8 +27,8 @@ export default function Home() {
   const scheduleId = "permanent-schedule";
   const currentDate = format(new Date(), "MMM dd"); // e.g., "Nov 01"
 
-  const { data: fetchedSchedule, isLoading } = useQuery({
-    queryKey: ["/api/schedule", scheduleId],
+  const { data: fetchedSchedule, isLoading } = useQuery<any>({
+    queryKey: [`/api/schedule?weekStartDate=${scheduleId}&weekEndDate=${scheduleId}`],
   });
 
   useEffect(() => {
