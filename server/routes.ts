@@ -137,6 +137,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put("/api/events/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const validatedData = insertEventSchema.partial().parse(req.body);
+      const event = await storage.updateEvent(id, validatedData);
+      res.json(event);
+    } catch (error: any) {
+      console.error('Error in PUT /api/events:', error);
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ error: "Invalid event data", details: error.errors });
+      }
+      res.status(500).json({ error: error.message || "Internal server error" });
+    }
+  });
+
   app.delete("/api/events/:id", async (req, res) => {
     try {
       const { id } = req.params;
