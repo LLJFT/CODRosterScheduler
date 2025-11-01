@@ -55,16 +55,16 @@ Preferred communication style: Simple, everyday language.
 
 **Data Flow Pattern**:
 1. Client requests schedule by week range
-2. Server checks in-memory storage first
+2. Server checks PostgreSQL database first
 3. If not found, attempts to read from Google Sheets
 4. Converts Google Sheets data to application schema
-5. Stores in memory and returns to client
-6. On save, writes to both memory storage and Google Sheets
+5. Stores in database and returns to client
+6. On save, writes to both database and Google Sheets
 
 **Storage Strategy**:
-- In-memory storage using Map data structures (MemStorage class)
-- Storage interface pattern (IStorage) for potential database swap
-- UUID-based entity identification
+- PostgreSQL database for persistent storage (DbStorage class)
+- Storage interface pattern (IStorage) for clean abstraction
+- UUID-based entity identification via gen_random_uuid()
 
 **Error Handling**:
 - Graceful fallback when Google Sheets unavailable
@@ -73,7 +73,7 @@ Preferred communication style: Simple, everyday language.
 
 ### Data Storage Solutions
 
-**Primary Storage**: In-memory Map-based storage (development/simple deployment)
+**Primary Storage**: PostgreSQL database (production-ready persistent storage)
 
 **Database Schema** (prepared for PostgreSQL via Drizzle ORM):
 - `players` table: id, name, role

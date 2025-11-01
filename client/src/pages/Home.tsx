@@ -6,6 +6,7 @@ import { WeekSelector } from "@/components/WeekSelector";
 import { PlayerManager } from "@/components/PlayerManager";
 import { SyncStatus } from "@/components/SyncStatus";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { AvailabilityAnalytics } from "@/components/AvailabilityAnalytics";
 import { Save, Share2, Download } from "lucide-react";
 import { startOfWeek, endOfWeek, format } from "date-fns";
 import { ar } from "date-fns/locale";
@@ -31,8 +32,12 @@ export default function Home() {
   });
 
   useEffect(() => {
-    if (fetchedSchedule?.scheduleData?.players) {
+    if (fetchedSchedule && fetchedSchedule.scheduleData?.players) {
       setScheduleData(fetchedSchedule.scheduleData.players);
+      setHasChanges(false);
+      setLastSyncTime(new Date());
+    } else if (fetchedSchedule && !fetchedSchedule.scheduleData?.players) {
+      setScheduleData([]);
       setHasChanges(false);
       setLastSyncTime(new Date());
     }
@@ -223,11 +228,17 @@ export default function Home() {
               </div>
             </div>
           ) : (
-            <ScheduleTable
-              scheduleData={scheduleData}
-              onAvailabilityChange={handleAvailabilityChange}
-              isLoading={saveMutation.isPending}
-            />
+            <>
+              <ScheduleTable
+                scheduleData={scheduleData}
+                onAvailabilityChange={handleAvailabilityChange}
+                isLoading={saveMutation.isPending}
+              />
+
+              {scheduleData.length > 0 && (
+                <AvailabilityAnalytics scheduleData={scheduleData} />
+              )}
+            </>
           )}
 
           {hasChanges && (
