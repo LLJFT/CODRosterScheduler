@@ -24,6 +24,8 @@ Preferred communication style: Simple, everyday language.
   - Role dropdowns (Tank, DPS, Support) in column A
   - Prevents manual entry errors in shared spreadsheets
   - Applied to current rows plus buffer for future entries
+  - Players automatically sorted by role (Tank → DPS → Support)
+  - Role-specific colors: Tank (light blue), DPS (light red), Support (light green)
 - **Professional Google Sheets Formatting** (November 1, 2025): Implemented beautiful formatting for exported schedules
   - Golden header row (RGB 1, 0.85, 0) with bold text matching app theme
   - Merged title row with centered text and border

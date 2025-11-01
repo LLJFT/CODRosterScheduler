@@ -337,6 +337,54 @@ export async function writeScheduleToSheet(sheetName: string, data: any[][]) {
       },
     });
 
+    // Add role-specific coloring
+    const roleColors: Record<string, { red: number; green: number; blue: number }> = {
+      Tank: { red: 0.5, green: 0.7, blue: 1 },      // Light blue
+      DPS: { red: 1, green: 0.5, blue: 0.5 },        // Light red
+      Support: { red: 0.5, green: 1, blue: 0.6 },    // Light green
+    };
+
+    // Apply colors to role cells
+    const colorRequests: any[] = [];
+    for (let i = 3; i < numRows; i++) {
+      const row = data[i];
+      if (row && row[0]) {
+        const role = row[0];
+        const color = roleColors[role];
+        if (color) {
+          colorRequests.push({
+            repeatCell: {
+              range: {
+                sheetId: sheetId,
+                startRowIndex: i,
+                endRowIndex: i + 1,
+                startColumnIndex: 0,
+                endColumnIndex: 1,
+              },
+              cell: {
+                userEnteredFormat: {
+                  backgroundColor: color,
+                  textFormat: {
+                    bold: true,
+                  },
+                },
+              },
+              fields: 'userEnteredFormat(backgroundColor,textFormat)',
+            },
+          });
+        }
+      }
+    }
+
+    if (colorRequests.length > 0) {
+      await sheets.spreadsheets.batchUpdate({
+        spreadsheetId,
+        requestBody: {
+          requests: colorRequests,
+        },
+      });
+    }
+
     return { success: true };
   } catch (error: any) {
     console.error('Error writing to Google Sheets:', error);
@@ -349,13 +397,33 @@ export function convertScheduleToSheetData(scheduleData: any, weekStart: string,
   
   const headerRow = ['Role', 'Players', ...days];
   
-  const dataRows = scheduleData.players.map((player: any) => {
-    const row = [
-      player.role,
-      player.playerName,
-      ...days.map(day => player.availability[day] || 'unknown')
-    ];
-    return row;
+  // Group players by role and sort them
+  const roleOrder = ['Tank', 'DPS', 'Support'];
+  const playersByRole: Record<string, any[]> = {
+    Tank: [],
+    DPS: [],
+    Support: [],
+  };
+  
+  // Group players by their role
+  scheduleData.players.forEach((player: any) => {
+    if (playersByRole[player.role]) {
+      playersByRole[player.role].push(player);
+    }
+  });
+  
+  // Create data rows in role order
+  const dataRows: any[][] = [];
+  roleOrder.forEach(role => {
+    const players = playersByRole[role] || [];
+    players.forEach((player: any) => {
+      const row = [
+        player.role,
+        player.playerName,
+        ...days.map(day => player.availability[day] || 'unknown')
+      ];
+      dataRows.push(row);
+    });
   });
 
   return [
