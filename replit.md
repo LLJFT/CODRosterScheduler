@@ -19,13 +19,16 @@ Preferred communication style: Simple, everyday language.
   - Dialog switches to edit mode showing "Edit Player" title
   - Pre-fills player name and role for easy modification
   - Updates player information in real-time
-- **Google Sheets Data Validation** (November 1, 2025): Added dropdown lists in Google Sheets
+- **Enhanced Google Sheets Formatting** (November 1, 2025): Professional role-based row coloring
+  - **Entire row coloring** based on player role (not just Role column):
+    - Tank rows: Light blue (#ADD8E6) - RGB(0.678, 0.847, 0.902)
+    - DPS rows: Light pink/red (#FFC0CB) - RGB(1, 0.753, 0.796)
+    - Support rows: Light green (#90EE90) - RGB(0.565, 0.933, 0.565)
+  - Bold text for Role column
+  - Players automatically sorted by role (Tank → DPS → Support)
   - Time slot dropdowns (unknown, 18:00-20:00 CEST, 20:00-22:00 CEST, All blocks, cannot)
   - Role dropdowns (Tank, DPS, Support) in column A
   - Prevents manual entry errors in shared spreadsheets
-  - Applied to current rows plus buffer for future entries
-  - Players automatically sorted by role (Tank → DPS → Support)
-  - Role-specific colors: Tank (light blue), DPS (light red), Support (light green)
 - **Professional Google Sheets Formatting** (November 1, 2025): Implemented beautiful formatting for exported schedules
   - Golden header row (RGB 1, 0.85, 0) with bold text matching app theme
   - Merged title row with centered text and border

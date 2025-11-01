@@ -337,14 +337,14 @@ export async function writeScheduleToSheet(sheetName: string, data: any[][]) {
       },
     });
 
-    // Add role-specific coloring
+    // Add role-specific coloring to entire rows
     const roleColors: Record<string, { red: number; green: number; blue: number }> = {
-      Tank: { red: 0.5, green: 0.7, blue: 1 },      // Light blue
-      DPS: { red: 1, green: 0.5, blue: 0.5 },        // Light red
-      Support: { red: 0.5, green: 1, blue: 0.6 },    // Light green
+      Tank: { red: 0.678, green: 0.847, blue: 0.902 },      // Light blue #ADD8E6
+      DPS: { red: 1, green: 0.753, blue: 0.796 },           // Light pink/red #FFC0CB
+      Support: { red: 0.565, green: 0.933, blue: 0.565 },   // Light green #90EE90
     };
 
-    // Apply colors to role cells
+    // Apply colors to entire rows based on role
     const colorRequests: any[] = [];
     for (let i = 3; i < numRows; i++) {
       const row = data[i];
@@ -352,6 +352,25 @@ export async function writeScheduleToSheet(sheetName: string, data: any[][]) {
         const role = row[0];
         const color = roleColors[role];
         if (color) {
+          // Color the entire row from column A to the last column
+          colorRequests.push({
+            repeatCell: {
+              range: {
+                sheetId: sheetId,
+                startRowIndex: i,
+                endRowIndex: i + 1,
+                startColumnIndex: 0,
+                endColumnIndex: numCols, // Color entire row
+              },
+              cell: {
+                userEnteredFormat: {
+                  backgroundColor: color,
+                },
+              },
+              fields: 'userEnteredFormat(backgroundColor)',
+            },
+          });
+          // Make Role column bold
           colorRequests.push({
             repeatCell: {
               range: {
@@ -363,13 +382,12 @@ export async function writeScheduleToSheet(sheetName: string, data: any[][]) {
               },
               cell: {
                 userEnteredFormat: {
-                  backgroundColor: color,
                   textFormat: {
                     bold: true,
                   },
                 },
               },
-              fields: 'userEnteredFormat(backgroundColor,textFormat)',
+              fields: 'userEnteredFormat(textFormat)',
             },
           });
         }
