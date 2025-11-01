@@ -123,76 +123,76 @@
 }
 
 .dark {
-  --button-outline: rgba(255,255,255, .10);
-  --badge-outline: rgba(255,255,255, .05);
+  --button-outline: rgba(255,255,255, .15);
+  --badge-outline: rgba(255,255,255, .10);
 
-  --opaque-button-border-intensity: 9;  /* In terms of percentages */
+  --opaque-button-border-intensity: 12;  /* In terms of percentages */
 
   /* Backgrounds applied on top of other backgrounds when hovered/active */
-  --elevate-1: rgba(255,255,255, .04);
-  --elevate-2: rgba(255,255,255, .09);
+  --elevate-1: rgba(255,215,0, .08);
+  --elevate-2: rgba(255,215,0, .15);
 
-  --background: 0 0% 5%;
+  --background: 0 0% 0%;
 
-  --foreground: 51 100% 50%;
+  --foreground: 51 100% 65%;
 
-  --border: 51 100% 30%;
+  --border: 51 80% 25%;
 
-  --card: 0 0% 8%;
+  --card: 0 0% 6%;
 
-  --card-foreground: 51 100% 50%;
+  --card-foreground: 51 100% 70%;
 
-  --card-border: 51 100% 35%;
+  --card-border: 51 70% 30%;
 
-  --sidebar: 0 0% 7%;
+  --sidebar: 0 0% 4%;
 
-  --sidebar-foreground: 51 100% 50%;
+  --sidebar-foreground: 51 100% 65%;
 
-  --sidebar-border: 51 100% 30%;
+  --sidebar-border: 51 80% 25%;
 
   --sidebar-primary: 51 100% 50%;
 
   --sidebar-primary-foreground: 0 0% 0%;
 
-  --sidebar-accent: 51 100% 15%;
+  --sidebar-accent: 51 100% 20%;
 
-  --sidebar-accent-foreground: 51 100% 85%;
+  --sidebar-accent-foreground: 51 100% 90%;
 
   --sidebar-ring: 51 100% 50%;
 
-  --popover: 0 0% 10%;
+  --popover: 0 0% 8%;
 
-  --popover-foreground: 51 100% 90%;
+  --popover-foreground: 51 100% 85%;
 
-  --popover-border: 51 100% 25%;
+  --popover-border: 51 60% 35%;
 
   --primary: 51 100% 50%;
 
   --primary-foreground: 0 0% 0%;
 
-  --secondary: 0 0% 15%;
+  --secondary: 0 0% 12%;
 
-  --secondary-foreground: 51 100% 50%;
+  --secondary-foreground: 51 100% 60%;
 
-  --muted: 0 0% 12%;
+  --muted: 0 0% 10%;
 
-  --muted-foreground: 51 50% 60%;
+  --muted-foreground: 51 60% 55%;
 
-  --accent: 0 0% 18%;
+  --accent: 51 100% 15%;
 
-  --accent-foreground: 51 100% 50%;
+  --accent-foreground: 51 100% 70%;
 
-  --destructive: 0 72% 51%;
+  --destructive: 0 85% 60%;
 
   --destructive-foreground: 0 0% 100%;
 
-  --input: 51 100% 25%;
+  --input: 51 70% 30%;
   --ring: 51 100% 50%;
-  --chart-1: 51 100% 55%;
-  --chart-2: 48 100% 50%;
-  --chart-3: 45 100% 45%;
-  --chart-4: 54 100% 60%;
-  --chart-5: 50 95% 53%;
+  --chart-1: 51 100% 60%;
+  --chart-2: 48 100% 55%;
+  --chart-3: 45 100% 50%;
+  --chart-4: 54 100% 65%;
+  --chart-5: 50 95% 58%;
 
   --shadow-2xs: 0px 1px 2px 0px hsl(0 0% 0% / 0.30);
   --shadow-xs: 0px 1px 3px 0px hsl(0 0% 0% / 0.40);
