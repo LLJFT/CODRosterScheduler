@@ -477,8 +477,11 @@ export function convertScheduleToSheetData(scheduleData: any, weekStart: string,
     });
   });
 
+  // Get current date in format "MMM DD"
+  const currentDate = new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit' });
+
   return [
-    [`Team Schedule ${weekStart} - ${weekEnd}`],
+    [`The Vicious Availability Times (${currentDate})`],
     [],
     headerRow,
     ...dataRows

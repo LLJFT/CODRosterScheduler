@@ -19,17 +19,16 @@ export default function Home() {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState<"success" | "error">("success");
-  const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }));
-  const [weekEnd, setWeekEnd] = useState(() => endOfWeek(new Date(), { weekStartsOn: 1 }));
   const [scheduleData, setScheduleData] = useState<PlayerAvailability[]>([]);
   const [hasChanges, setHasChanges] = useState(false);
   const [lastSyncTime, setLastSyncTime] = useState<Date>();
 
-  const weekStartStr = format(weekStart, "yyyy-MM-dd");
-  const weekEndStr = format(weekEnd, "yyyy-MM-dd");
+  // Use a fixed identifier for the permanent schedule
+  const scheduleId = "permanent-schedule";
+  const currentDate = format(new Date(), "MMM dd"); // e.g., "Nov 01"
 
   const { data: fetchedSchedule, isLoading } = useQuery({
-    queryKey: ["/api/schedule", weekStartStr, weekEndStr],
+    queryKey: ["/api/schedule", scheduleId],
   });
 
   useEffect(() => {
@@ -48,8 +47,8 @@ export default function Home() {
     mutationFn: async () => {
       console.log("[Save Mutation] Starting save...");
       const response = await apiRequest("POST", "/api/schedule", {
-        weekStartDate: weekStartStr,
-        weekEndDate: weekEndStr,
+        weekStartDate: scheduleId,
+        weekEndDate: scheduleId,
         scheduleData: { players: scheduleData },
       });
       const data = await response.json();
@@ -74,15 +73,6 @@ export default function Home() {
     },
   });
 
-  const handleWeekChange = (start: Date, end: Date) => {
-    if (hasChanges) {
-      const confirm = window.confirm("You have unsaved changes. Do you want to continue?");
-      if (!confirm) return;
-    }
-    setWeekStart(start);
-    setWeekEnd(end);
-    setHasChanges(false);
-  };
 
   const handleAvailabilityChange = (playerId: string, day: DayOfWeek, availability: AvailabilityOption) => {
     setScheduleData((prev) =>
@@ -193,8 +183,6 @@ export default function Home() {
     window.print();
   };
 
-  const weekDisplay = `${format(weekStart, "dd.MM")} - ${format(weekEnd, "dd.MM")}`;
-
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-6 max-w-7xl">
@@ -205,7 +193,7 @@ export default function Home() {
                 Marvel Rivals
               </h1>
               <p className="text-lg font-semibold text-primary" data-testid="text-week-range">
-                Team Schedule {weekDisplay}
+                The Vicious Availability Times ({currentDate})
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -219,11 +207,6 @@ export default function Home() {
           </div>
 
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <WeekSelector
-              weekStart={weekStart}
-              weekEnd={weekEnd}
-              onWeekChange={handleWeekChange}
-            />
 
             <div className="flex items-center gap-2 flex-wrap">
               <PlayerManager

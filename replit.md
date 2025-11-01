@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a team schedule and attendance management application for Marvel Rivals esports teams. The application allows team managers to track player availability across different roles (Tank, DPS, Support) for weekly practice sessions. It features a weekly calendar view with time block selections, real-time synchronization with Google Sheets, and a Material Design-inspired interface with golden/black theme matching Marvel Rivals branding.
+This is a permanent team availability tracker for Marvel Rivals esports teams called "The Vicious". The application allows team managers to track player availability across different roles (Tank, DPS, Support) for practice sessions. It features a permanent schedule (Monday-Sunday) that persists year-round, real-time synchronization with Google Sheets, inline editing capabilities, and a Material Design-inspired interface with golden/black theme matching Marvel Rivals branding.
 
 ## User Preferences
 
@@ -54,12 +54,15 @@ Preferred communication style: Simple, everyday language.
   - Dark mode borders: HSL 51 100% 30% (darker golden yellow for contrast)
   - Design matches Marvel Rivals esports branding with bold golden accents on black
   - All color tokens updated in index.css for consistent theming across all components
+- **Permanent Schedule** (November 1, 2025): Changed from weekly schedule to permanent year-round schedule
+  - Removed week selector - schedule is now permanent (Monday-Sunday)
+  - Schedule persists across all sessions with ID "permanent-schedule"
+  - Title updated to "The Vicious Availability Times (Current Date)"
+  - Google Sheets reflects permanent schedule with current date
 - **Dynamic Google Sheets Creation** (November 1, 2025): Implemented automatic spreadsheet creation per user
-  - Removed hardcoded spreadsheet ID (was: 1W0wvf6RODd-fcJ2mFh89LyyN3RKCaxp-_DaR74cHKjA)
-  - System now creates a unique "Marvel Rivals Team Schedule" spreadsheet on first save
+  - System now creates a unique spreadsheet titled "The Vicious Availability Times" on first save
   - Spreadsheet ID stored in new `settings` database table for reuse across sessions
   - Share button provides user's own Google Sheets link dynamically via /api/spreadsheet-info endpoint
-- **Share Functionality Update** (November 1, 2025): Share button now copies Google Sheets link instead of Replit app URL
 
 ## System Architecture
 
