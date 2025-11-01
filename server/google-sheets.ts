@@ -114,8 +114,10 @@ export async function writeScheduleToSheet(sheetName: string, data: any[][]) {
       (sheet) => sheet.properties?.title === sheetName
     );
 
+    let sheetId = 0;
+    
     if (!sheetExists) {
-      await sheets.spreadsheets.batchUpdate({
+      const response = await sheets.spreadsheets.batchUpdate({
         spreadsheetId,
         requestBody: {
           requests: [
@@ -129,6 +131,12 @@ export async function writeScheduleToSheet(sheetName: string, data: any[][]) {
           ],
         },
       });
+      sheetId = response.data.replies?.[0]?.addSheet?.properties?.sheetId || 0;
+    } else {
+      const sheet = allSheets.data.sheets?.find(
+        (sheet) => sheet.properties?.title === sheetName
+      );
+      sheetId = sheet?.properties?.sheetId || 0;
     }
 
     await sheets.spreadsheets.values.clear({
@@ -142,6 +150,140 @@ export async function writeScheduleToSheet(sheetName: string, data: any[][]) {
       valueInputOption: 'RAW',
       requestBody: {
         values: data,
+      },
+    });
+
+    // Apply beautiful formatting
+    const numRows = data.length;
+    // Get maximum column count across all rows to ensure all columns are formatted
+    const numCols = data.length > 0 ? Math.max(...data.map(row => row?.length || 0), 9) : 9;
+
+    await sheets.spreadsheets.batchUpdate({
+      spreadsheetId,
+      requestBody: {
+        requests: [
+          // Auto-resize all columns
+          {
+            autoResizeDimensions: {
+              dimensions: {
+                sheetId: sheetId,
+                dimension: 'COLUMNS',
+                startIndex: 0,
+                endIndex: numCols,
+              },
+            },
+          },
+          // Format title row (row 1) - merge and center
+          {
+            mergeCells: {
+              range: {
+                sheetId: sheetId,
+                startRowIndex: 0,
+                endRowIndex: 1,
+                startColumnIndex: 0,
+                endColumnIndex: numCols,
+              },
+              mergeType: 'MERGE_ALL',
+            },
+          },
+          // Style title row - golden background with bold text
+          {
+            repeatCell: {
+              range: {
+                sheetId: sheetId,
+                startRowIndex: 0,
+                endRowIndex: 1,
+                startColumnIndex: 0,
+                endColumnIndex: numCols,
+              },
+              cell: {
+                userEnteredFormat: {
+                  backgroundColor: { red: 1, green: 0.85, blue: 0 }, // Golden yellow
+                  horizontalAlignment: 'CENTER',
+                  verticalAlignment: 'MIDDLE',
+                  textFormat: {
+                    bold: true,
+                    fontSize: 14,
+                  },
+                  borders: {
+                    top: { style: 'SOLID', width: 2 },
+                    bottom: { style: 'SOLID', width: 2 },
+                    left: { style: 'SOLID', width: 2 },
+                    right: { style: 'SOLID', width: 2 },
+                  },
+                },
+              },
+              fields: 'userEnteredFormat(backgroundColor,horizontalAlignment,verticalAlignment,textFormat,borders)',
+            },
+          },
+          // Style header row (row 3) - golden background with bold text
+          {
+            repeatCell: {
+              range: {
+                sheetId: sheetId,
+                startRowIndex: 2,
+                endRowIndex: 3,
+                startColumnIndex: 0,
+                endColumnIndex: numCols,
+              },
+              cell: {
+                userEnteredFormat: {
+                  backgroundColor: { red: 1, green: 0.85, blue: 0 }, // Golden yellow
+                  horizontalAlignment: 'CENTER',
+                  verticalAlignment: 'MIDDLE',
+                  textFormat: {
+                    bold: true,
+                    fontSize: 11,
+                  },
+                  borders: {
+                    top: { style: 'SOLID', width: 1 },
+                    bottom: { style: 'SOLID', width: 1 },
+                    left: { style: 'SOLID', width: 1 },
+                    right: { style: 'SOLID', width: 1 },
+                  },
+                },
+              },
+              fields: 'userEnteredFormat(backgroundColor,horizontalAlignment,verticalAlignment,textFormat,borders)',
+            },
+          },
+          // Style data rows - borders and center alignment
+          {
+            repeatCell: {
+              range: {
+                sheetId: sheetId,
+                startRowIndex: 3,
+                endRowIndex: numRows,
+                startColumnIndex: 0,
+                endColumnIndex: numCols,
+              },
+              cell: {
+                userEnteredFormat: {
+                  horizontalAlignment: 'CENTER',
+                  verticalAlignment: 'MIDDLE',
+                  borders: {
+                    top: { style: 'SOLID', width: 1, color: { red: 0.8, green: 0.8, blue: 0.8 } },
+                    bottom: { style: 'SOLID', width: 1, color: { red: 0.8, green: 0.8, blue: 0.8 } },
+                    left: { style: 'SOLID', width: 1, color: { red: 0.8, green: 0.8, blue: 0.8 } },
+                    right: { style: 'SOLID', width: 1, color: { red: 0.8, green: 0.8, blue: 0.8 } },
+                  },
+                },
+              },
+              fields: 'userEnteredFormat(horizontalAlignment,verticalAlignment,borders)',
+            },
+          },
+          // Freeze header rows
+          {
+            updateSheetProperties: {
+              properties: {
+                sheetId: sheetId,
+                gridProperties: {
+                  frozenRowCount: 3,
+                },
+              },
+              fields: 'gridProperties.frozenRowCount',
+            },
+          },
+        ],
       },
     });
 

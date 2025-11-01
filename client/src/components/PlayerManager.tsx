@@ -38,11 +38,11 @@ const roleColors: Record<string, string> = {
 };
 
 const roleDisplayNames: Record<RoleType, string> = {
-  Tank: "دبابة",
-  DPS: "مهاجم",
-  Support: "دعم",
-  Sub: "بديل",
-  Coach: "مدرب",
+  Tank: "Tank",
+  DPS: "DPS",
+  Support: "Support",
+  Sub: "Sub",
+  Coach: "Coach",
 };
 
 export function PlayerManager({ players, onAddPlayer, onRemovePlayer }: PlayerManagerProps) {
@@ -64,24 +64,24 @@ export function PlayerManager({ players, onAddPlayer, onRemovePlayer }: PlayerMa
       <DialogTrigger asChild>
         <Button variant="default" className="gap-2" data-testid="button-add-player">
           <Plus className="h-4 w-4" />
-          إدارة اللاعبين
+          Manage Players
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>إدارة اللاعبين</DialogTitle>
+          <DialogTitle>Manage Players</DialogTitle>
           <DialogDescription>
-            أضف لاعبين جدد أو احذف لاعبين موجودين
+            Add new players or remove existing ones
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="player-name">اسم اللاعب</Label>
+              <Label htmlFor="player-name">Player Name</Label>
               <Input
                 id="player-name"
-                placeholder="أدخل اسم اللاعب"
+                placeholder="Enter player name"
                 value={newPlayerName}
                 onChange={(e) => setNewPlayerName(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleAddPlayer()}
@@ -90,7 +90,7 @@ export function PlayerManager({ players, onAddPlayer, onRemovePlayer }: PlayerMa
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="player-role">الدور</Label>
+              <Label htmlFor="player-role">Role</Label>
               <Select value={newPlayerRole} onValueChange={(v) => setNewPlayerRole(v as RoleType)}>
                 <SelectTrigger id="player-role" data-testid="select-player-role">
                   <SelectValue />
@@ -112,13 +112,13 @@ export function PlayerManager({ players, onAddPlayer, onRemovePlayer }: PlayerMa
               data-testid="button-confirm-add-player"
             >
               <Plus className="h-4 w-4 mr-2" />
-              إضافة لاعب
+              Add Player
             </Button>
           </div>
 
           {players.length > 0 && (
             <div className="space-y-2">
-              <Label>اللاعبون الحاليون</Label>
+              <Label>Current Players</Label>
               <div className="max-h-[300px] overflow-y-auto space-y-2 rounded-md border border-border p-3">
                 {players.map((player) => (
                   <div
@@ -150,7 +150,7 @@ export function PlayerManager({ players, onAddPlayer, onRemovePlayer }: PlayerMa
 
         <DialogFooter>
           <Button variant="outline" onClick={() => setIsOpen(false)} data-testid="button-close-dialog">
-            إغلاق
+            Close
           </Button>
         </DialogFooter>
       </DialogContent>

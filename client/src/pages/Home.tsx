@@ -62,13 +62,13 @@ export default function Home() {
       setHasChanges(false);
       setLastSyncTime(new Date());
       console.log("[Save Mutation] Showing success toast");
-      setToastMessage("تم الحفظ بنجاح في Google Sheets");
+      setToastMessage("Successfully saved to Google Sheets");
       setToastType("success");
       setShowToast(true);
     },
     onError: (error: any) => {
       console.log("[Save Mutation] onError called:", error);
-      setToastMessage(error.message || "خطأ في حفظ الجدول");
+      setToastMessage(error.message || "Error saving schedule");
       setToastType("error");
       setShowToast(true);
     },
@@ -76,7 +76,7 @@ export default function Home() {
 
   const handleWeekChange = (start: Date, end: Date) => {
     if (hasChanges) {
-      const confirm = window.confirm("لديك تغييرات غير محفوظة. هل تريد المتابعة؟");
+      const confirm = window.confirm("You have unsaved changes. Do you want to continue?");
       if (!confirm) return;
     }
     setWeekStart(start);
@@ -113,7 +113,7 @@ export default function Home() {
     };
     setScheduleData((prev) => [...prev, newPlayer]);
     setHasChanges(true);
-    setToastMessage(`تمت إضافة ${name} للجدول`);
+    setToastMessage(`Added ${name} to schedule`);
     setToastType("success");
     setShowToast(true);
   };
@@ -121,12 +121,12 @@ export default function Home() {
   const handleRemovePlayer = (playerId: string) => {
     const player = scheduleData.find((p) => p.playerId === playerId);
     if (player) {
-      const confirm = window.confirm(`هل تريد حذف ${player.playerName}؟`);
+      const confirm = window.confirm(`Remove ${player.playerName}?`);
       if (!confirm) return;
       
       setScheduleData((prev) => prev.filter((p) => p.playerId !== playerId));
       setHasChanges(true);
-      setToastMessage(`تم حذف ${player.playerName} من الجدول`);
+      setToastMessage(`Removed ${player.playerName} from schedule`);
       setToastType("success");
       setShowToast(true);
     }
@@ -142,12 +142,12 @@ export default function Home() {
       }
       
       await navigator.clipboard.writeText(data.url);
-      setToastMessage("تم نسخ رابط Google Sheets");
+      setToastMessage("Google Sheets link copied");
       setToastType("success");
       setShowToast(true);
     } catch (error) {
       console.error('Share error:', error);
-      setToastMessage("فشل نسخ الرابط");
+      setToastMessage("Failed to copy link");
       setToastType("error");
       setShowToast(true);
     }
@@ -169,7 +169,7 @@ export default function Home() {
                 Marvel Rivals
               </h1>
               <p className="text-lg font-semibold text-primary" data-testid="text-week-range">
-                جدول الفريق {weekDisplay}
+                Team Schedule {weekDisplay}
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -202,7 +202,7 @@ export default function Home() {
                 data-testid="button-share"
               >
                 <Share2 className="h-4 w-4" />
-                مشاركة
+                Share
               </Button>
               <Button
                 variant="outline"
@@ -211,7 +211,7 @@ export default function Home() {
                 data-testid="button-export"
               >
                 <Download className="h-4 w-4" />
-                تصدير
+                Export
               </Button>
               <Button
                 variant="default"
@@ -221,7 +221,7 @@ export default function Home() {
                 data-testid="button-save"
               >
                 <Save className="h-4 w-4" />
-                {saveMutation.isPending ? "جارٍ الحفظ..." : "حفظ"}
+                {saveMutation.isPending ? "Saving..." : "Save"}
               </Button>
             </div>
           </div>
@@ -230,7 +230,7 @@ export default function Home() {
             <div className="flex items-center justify-center py-20">
               <div className="text-center space-y-3">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-                <p className="text-muted-foreground">جارٍ التحميل...</p>
+                <p className="text-muted-foreground">Loading...</p>
               </div>
             </div>
           ) : (
@@ -250,7 +250,7 @@ export default function Home() {
           {hasChanges && (
             <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
               <div className="bg-primary text-primary-foreground px-6 py-3 rounded-lg shadow-lg flex items-center gap-3">
-                <span className="text-sm font-medium">لديك تغييرات غير محفوظة</span>
+                <span className="text-sm font-medium">You have unsaved changes</span>
                 <Button
                   size="sm"
                   variant="secondary"
@@ -258,7 +258,7 @@ export default function Home() {
                   disabled={saveMutation.isPending}
                   data-testid="button-save-floating"
                 >
-                  احفظ الآن
+                  Save Now
                 </Button>
               </div>
             </div>
