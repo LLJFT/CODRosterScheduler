@@ -8,6 +8,16 @@ This is a team schedule and attendance management application for Marvel Rivals 
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+
+- **Dynamic Google Sheets Creation** (November 1, 2025): Implemented automatic spreadsheet creation per user
+  - Removed hardcoded spreadsheet ID (was: 1W0wvf6RODd-fcJ2mFh89LyyN3RKCaxp-_DaR74cHKjA)
+  - System now creates a unique "Marvel Rivals Team Schedule" spreadsheet on first save
+  - Spreadsheet ID stored in new `settings` database table for reuse across sessions
+  - Share button provides user's own Google Sheets link dynamically via /api/spreadsheet-info endpoint
+- **Language Conversion** (November 1, 2025): Converted entire UI from Arabic (RTL) to English (LTR)
+- **Share Functionality Update** (November 1, 2025): Share button now copies Google Sheets link instead of Replit app URL
+
 ## System Architecture
 
 ### Frontend Architecture
@@ -52,6 +62,7 @@ Preferred communication style: Simple, everyday language.
 - `GET /api/players` - Fetch all players
 - `POST /api/players` - Add new player
 - `DELETE /api/players/:id` - Remove player
+- `GET /api/spreadsheet-info` - Get user's Google Sheets spreadsheet ID and URL
 
 **Data Flow Pattern**:
 1. Client requests schedule by week range
@@ -78,6 +89,7 @@ Preferred communication style: Simple, everyday language.
 **Database Schema** (prepared for PostgreSQL via Drizzle ORM):
 - `players` table: id, name, role
 - `schedules` table: id, weekStartDate, weekEndDate, scheduleData (JSONB), googleSheetId
+- `settings` table: id, key (unique), value - Stores application settings including Google Sheets spreadsheet ID
 
 **Schema Design Philosophy**:
 - JSONB column for flexible schedule data structure
@@ -121,7 +133,9 @@ Schedule {
 - Purpose: Two-way sync of schedule data for sharing with team
 - Authentication: OAuth2 via Replit Connectors system
 - Access token management with automatic refresh
-- Sheet naming convention: `Week_{weekStartDate}`
+- Dynamic spreadsheet creation: Creates new spreadsheet titled "Marvel Rivals Team Schedule" on first use
+- Spreadsheet ID persistence: Stored in settings table with key "google_spreadsheet_id"
+- Sheet naming convention: `Week_{weekStartDate}` (tabs within the user's spreadsheet)
 - Data transformation layer to convert between app format and spreadsheet layout
 
 **Google APIs Client**:
