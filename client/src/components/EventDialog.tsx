@@ -29,7 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { eventTypes, insertEventSchema } from "@shared/schema";
+import { eventTypes, insertEventSchema, type Event } from "@shared/schema";
 
 const formSchema = insertEventSchema.extend({
   time: z.string().optional(),
@@ -42,6 +42,7 @@ interface EventDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   selectedDate?: Date;
+  eventToEdit?: Event;
   onSuccess: (message: string) => void;
 }
 
@@ -49,51 +50,69 @@ export function EventDialog({
   open,
   onOpenChange,
   selectedDate,
+  eventToEdit,
   onSuccess,
 }: EventDialogProps) {
+  const isEditMode = !!eventToEdit;
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: "",
-      eventType: "Tournament",
-      date: selectedDate ? format(selectedDate, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd"),
-      time: "",
-      description: "",
+      title: eventToEdit?.title || "",
+      eventType: eventToEdit?.eventType || "Tournament",
+      date: eventToEdit?.date || (selectedDate ? format(selectedDate, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd")),
+      time: eventToEdit?.time || "",
+      description: eventToEdit?.description || "",
     },
   });
 
-  // Update date field when selectedDate changes
+  // Update form when eventToEdit changes
   useEffect(() => {
-    if (selectedDate) {
+    if (eventToEdit) {
+      form.reset({
+        title: eventToEdit.title,
+        eventType: eventToEdit.eventType,
+        date: eventToEdit.date,
+        time: eventToEdit.time || "",
+        description: eventToEdit.description || "",
+      });
+    } else if (selectedDate) {
       form.setValue("date", format(selectedDate, "yyyy-MM-dd"));
     }
-  }, [selectedDate, form]);
+  }, [eventToEdit, selectedDate, form]);
 
-  const addEventMutation = useMutation({
+  const saveEventMutation = useMutation({
     mutationFn: async (data: FormValues) => {
-      const response = await apiRequest("POST", "/api/events", data);
-      return response.json();
+      if (isEditMode && eventToEdit) {
+        const response = await apiRequest("PUT", `/api/events/${eventToEdit.id}`, data);
+        return response.json();
+      } else {
+        const response = await apiRequest("POST", "/api/events", data);
+        return response.json();
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
-      onSuccess("Event created successfully");
+      onSuccess(isEditMode ? "Event updated successfully" : "Event created successfully");
       form.reset();
       onOpenChange(false);
     },
     onError: (error: any) => {
-      console.error("Error creating event:", error);
+      console.error("Error saving event:", error);
     },
   });
 
   const onSubmit = (data: FormValues) => {
-    addEventMutation.mutate(data);
+    saveEventMutation.mutate(data);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]" data-testid="dialog-event">
         <DialogHeader>
-          <DialogTitle className="text-foreground">Add New Event</DialogTitle>
+          <DialogTitle className="text-foreground">
+            {isEditMode ? "Edit Event" : "Add New Event"}
+          </DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
@@ -206,10 +225,12 @@ export function EventDialog({
               </Button>
               <Button
                 type="submit"
-                disabled={addEventMutation.isPending}
+                disabled={saveEventMutation.isPending}
                 data-testid="button-save-event"
               >
-                {addEventMutation.isPending ? "Creating..." : "Create Event"}
+                {saveEventMutation.isPending 
+                  ? (isEditMode ? "Updating..." : "Creating...") 
+                  : (isEditMode ? "Update Event" : "Create Event")}
               </Button>
             </div>
           </form>
