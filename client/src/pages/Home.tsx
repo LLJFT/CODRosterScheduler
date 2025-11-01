@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { ScheduleTable } from "@/components/ScheduleTable";
 import { WeekSelector } from "@/components/WeekSelector";
@@ -8,7 +9,7 @@ import { SyncStatus } from "@/components/SyncStatus";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { AvailabilityAnalytics } from "@/components/AvailabilityAnalytics";
 import { SimpleToast } from "@/components/SimpleToast";
-import { Save, Share2, Download } from "lucide-react";
+import { Save, Share2, Download, Calendar } from "lucide-react";
 import { startOfWeek, endOfWeek, format } from "date-fns";
 import type { PlayerAvailability, DayOfWeek, AvailabilityOption, RoleType } from "@shared/schema";
 import { dayOfWeek } from "@shared/schema";
@@ -215,6 +216,16 @@ export default function Home() {
                 onRemovePlayer={handleRemovePlayer}
                 onEditPlayer={handleEditPlayer}
               />
+              <Link href="/events">
+                <Button
+                  variant="outline"
+                  className="gap-2"
+                  data-testid="button-events"
+                >
+                  <Calendar className="h-4 w-4" />
+                  Events
+                </Button>
+              </Link>
               <Button
                 variant="outline"
                 onClick={handleShare}

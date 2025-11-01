@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertScheduleSchema } from "@shared/schema";
+import { insertScheduleSchema, insertEventSchema } from "@shared/schema";
 import { 
   readScheduleFromSheet, 
   writeScheduleToSheet, 
@@ -109,6 +109,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ spreadsheetId, url });
     } catch (error: any) {
       console.error('Error in GET /api/spreadsheet-info:', error);
+      res.status(500).json({ error: error.message || "Internal server error" });
+    }
+  });
+
+  app.get("/api/events", async (req, res) => {
+    try {
+      const events = await storage.getAllEvents();
+      res.json(events);
+    } catch (error: any) {
+      console.error('Error in GET /api/events:', error);
+      res.status(500).json({ error: error.message || "Internal server error" });
+    }
+  });
+
+  app.post("/api/events", async (req, res) => {
+    try {
+      const validatedData = insertEventSchema.parse(req.body);
+      const event = await storage.addEvent(validatedData);
+      res.json(event);
+    } catch (error: any) {
+      console.error('Error in POST /api/events:', error);
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ error: "Invalid event data", details: error.errors });
+      }
+      res.status(500).json({ error: error.message || "Internal server error" });
+    }
+  });
+
+  app.delete("/api/events/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const success = await storage.removeEvent(id);
+      if (success) {
+        res.json({ success: true });
+      } else {
+        res.status(404).json({ error: "Event not found" });
+      }
+    } catch (error: any) {
+      console.error('Error in DELETE /api/events:', error);
       res.status(500).json({ error: error.message || "Internal server error" });
     }
   });

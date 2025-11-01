@@ -1,5 +1,5 @@
-import type { Player, InsertPlayer, Schedule, InsertSchedule, Setting, InsertSetting } from "@shared/schema";
-import { players, schedules, settings } from "@shared/schema";
+import type { Player, InsertPlayer, Schedule, InsertSchedule, Setting, InsertSetting, Event, InsertEvent } from "@shared/schema";
+import { players, schedules, settings, events } from "@shared/schema";
 import { db } from "./db";
 import { eq, and } from "drizzle-orm";
 
@@ -11,6 +11,10 @@ export interface IStorage {
   removePlayer(id: string): Promise<boolean>;
   getSetting(key: string): Promise<string | null>;
   setSetting(key: string, value: string): Promise<Setting>;
+  getAllEvents(): Promise<Event[]>;
+  addEvent(event: InsertEvent): Promise<Event>;
+  updateEvent(id: string, event: Partial<InsertEvent>): Promise<Event>;
+  removeEvent(id: string): Promise<boolean>;
 }
 
 export class DbStorage implements IStorage {
@@ -107,6 +111,38 @@ export class DbStorage implements IStorage {
       .returning();
 
     return inserted[0];
+  }
+
+  async getAllEvents(): Promise<Event[]> {
+    return await db.select().from(events);
+  }
+
+  async addEvent(insertEvent: InsertEvent): Promise<Event> {
+    const inserted = await db
+      .insert(events)
+      .values(insertEvent)
+      .returning();
+
+    return inserted[0];
+  }
+
+  async updateEvent(id: string, updateData: Partial<InsertEvent>): Promise<Event> {
+    const updated = await db
+      .update(events)
+      .set(updateData)
+      .where(eq(events.id, id))
+      .returning();
+
+    return updated[0];
+  }
+
+  async removeEvent(id: string): Promise<boolean> {
+    const deleted = await db
+      .delete(events)
+      .where(eq(events.id, id))
+      .returning();
+
+    return deleted.length > 0;
   }
 }
 

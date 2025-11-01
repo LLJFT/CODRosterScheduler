@@ -10,6 +10,13 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **Events Calendar Page** (November 1, 2025): Added dedicated calendar page for team events
+  - New `/events` route with calendar view for tournaments, scrims, and VOD reviews
+  - Interactive calendar with date selection and event indicators
+  - Event creation dialog with event type (Tournament/Scrim/VOD Review), title, date, time, and description
+  - Events stored in PostgreSQL database with full CRUD operations
+  - Navigation between Schedule and Events pages via header buttons
+  - Pure black background with golden accents matching main app theme
 - **Role Simplification** (November 1, 2025): Reduced roles to Tank, DPS, Support only
   - Removed Sub and Coach roles from all components
   - Updated schema, PlayerManager, and ScheduleTable
@@ -109,6 +116,9 @@ Preferred communication style: Simple, everyday language.
 - `POST /api/players` - Add new player
 - `DELETE /api/players/:id` - Remove player
 - `GET /api/spreadsheet-info` - Get user's Google Sheets spreadsheet ID and URL
+- `GET /api/events` - Fetch all team events
+- `POST /api/events` - Create new event
+- `DELETE /api/events/:id` - Delete event
 
 **Data Flow Pattern**:
 1. Client requests schedule by week range
@@ -136,6 +146,7 @@ Preferred communication style: Simple, everyday language.
 - `players` table: id, name, role
 - `schedules` table: id, weekStartDate, weekEndDate, scheduleData (JSONB), googleSheetId
 - `settings` table: id, key (unique), value - Stores application settings including Google Sheets spreadsheet ID
+- `events` table: id, title, eventType (Tournament/Scrim/VOD Review), date, time, description - Stores team events for calendar view
 
 **Schema Design Philosophy**:
 - JSONB column for flexible schedule data structure
