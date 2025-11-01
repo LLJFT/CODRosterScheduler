@@ -24,6 +24,14 @@ const roleColors: Record<string, string> = {
   Coach: "bg-purple-500/10 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300 border-purple-500/20",
 };
 
+const roleDisplayNames: Record<string, string> = {
+  Tank: "دبابة",
+  DPS: "مهاجم",
+  Support: "دعم",
+  Sub: "بديل",
+  Coach: "مدرب",
+};
+
 const availabilityColors: Record<AvailabilityOption, string> = {
   "unknown": "bg-muted text-muted-foreground",
   "18:00-20:00 CEST": "bg-primary/10 text-primary dark:bg-primary/20",
@@ -33,11 +41,11 @@ const availabilityColors: Record<AvailabilityOption, string> = {
 };
 
 const availabilityDisplayText: Record<AvailabilityOption, string> = {
-  "unknown": "Unknown",
+  "unknown": "غير معروف",
   "18:00-20:00 CEST": "18:00-20:00",
   "20:00-22:00 CEST": "20:00-22:00",
-  "All blocks": "All blocks",
-  "cannot": "Cannot",
+  "All blocks": "كل الأوقات",
+  "cannot": "غير متاح",
 };
 
 export function ScheduleTable({ scheduleData, onAvailabilityChange, isLoading }: ScheduleTableProps) {
@@ -72,11 +80,11 @@ export function ScheduleTable({ scheduleData, onAvailabilityChange, isLoading }:
         <table className="w-full border-collapse">
           <thead>
             <tr className="bg-primary text-primary-foreground">
-              <th className="border-r border-primary-border px-4 py-3 text-left text-sm font-semibold uppercase tracking-wide">
-                Role
+              <th className="border-r border-primary-border px-4 py-3 text-right text-sm font-semibold uppercase tracking-wide">
+                الدور
               </th>
-              <th className="border-r border-primary-border px-4 py-3 text-left text-sm font-semibold uppercase tracking-wide min-w-[140px]">
-                Player
+              <th className="border-r border-primary-border px-4 py-3 text-right text-sm font-semibold uppercase tracking-wide min-w-[140px]">
+                اللاعب
               </th>
               {dayOfWeek.map((day) => (
                 <th
@@ -84,13 +92,13 @@ export function ScheduleTable({ scheduleData, onAvailabilityChange, isLoading }:
                   className="border-r border-primary-border px-3 py-3 text-center text-sm font-semibold uppercase tracking-wide min-w-[160px] last:border-r-0"
                   data-testid={`header-${day.toLowerCase()}`}
                 >
-                  {day === "Monday" && "Monday"}
-                  {day === "Tuesday" && "Tuesday"}
-                  {day === "Wednesday" && "Wednesday"}
-                  {day === "Thursday" && "Thursday"}
-                  {day === "Friday" && "Friday"}
-                  {day === "Saturday" && "Saturday"}
-                  {day === "Sunday" && "Sunday"}
+                  {day === "Monday" && "الاثنين"}
+                  {day === "Tuesday" && "الثلاثاء"}
+                  {day === "Wednesday" && "الأربعاء"}
+                  {day === "Thursday" && "الخميس"}
+                  {day === "Friday" && "الجمعة"}
+                  {day === "Saturday" && "السبت"}
+                  {day === "Sunday" && "الأحد"}
                 </th>
               ))}
             </tr>
@@ -112,7 +120,7 @@ export function ScheduleTable({ scheduleData, onAvailabilityChange, isLoading }:
                       className={`${roleColors[role]} font-medium text-xs`}
                       data-testid={`badge-role-${player.playerId}`}
                     >
-                      {role}
+                      {roleDisplayNames[role]}
                     </Badge>
                   </td>
                   <td className="border-r border-border px-4 py-3 bg-card">
@@ -172,7 +180,7 @@ export function ScheduleTable({ scheduleData, onAvailabilityChange, isLoading }:
       </div>
       {scheduleData.length === 0 && (
         <div className="py-12 text-center">
-          <p className="text-muted-foreground text-sm">No players in schedule</p>
+          <p className="text-muted-foreground text-sm">لا يوجد لاعبون في الجدول</p>
         </div>
       )}
     </div>

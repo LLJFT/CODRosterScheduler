@@ -37,6 +37,14 @@ const roleColors: Record<string, string> = {
   Coach: "bg-purple-500/10 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300 border-purple-500/20",
 };
 
+const roleDisplayNames: Record<RoleType, string> = {
+  Tank: "دبابة",
+  DPS: "مهاجم",
+  Support: "دعم",
+  Sub: "بديل",
+  Coach: "مدرب",
+};
+
 export function PlayerManager({ players, onAddPlayer, onRemovePlayer }: PlayerManagerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [newPlayerName, setNewPlayerName] = useState("");
@@ -56,24 +64,24 @@ export function PlayerManager({ players, onAddPlayer, onRemovePlayer }: PlayerMa
       <DialogTrigger asChild>
         <Button variant="default" className="gap-2" data-testid="button-add-player">
           <Plus className="h-4 w-4" />
-          Manage Players
+          إدارة اللاعبين
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Manage Players</DialogTitle>
+          <DialogTitle>إدارة اللاعبين</DialogTitle>
           <DialogDescription>
-            Add new players or remove existing ones
+            أضف لاعبين جدد أو احذف لاعبين موجودين
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="player-name">Player Name</Label>
+              <Label htmlFor="player-name">اسم اللاعب</Label>
               <Input
                 id="player-name"
-                placeholder="Enter player name"
+                placeholder="أدخل اسم اللاعب"
                 value={newPlayerName}
                 onChange={(e) => setNewPlayerName(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleAddPlayer()}
@@ -82,7 +90,7 @@ export function PlayerManager({ players, onAddPlayer, onRemovePlayer }: PlayerMa
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="player-role">Role</Label>
+              <Label htmlFor="player-role">الدور</Label>
               <Select value={newPlayerRole} onValueChange={(v) => setNewPlayerRole(v as RoleType)}>
                 <SelectTrigger id="player-role" data-testid="select-player-role">
                   <SelectValue />
@@ -90,7 +98,7 @@ export function PlayerManager({ players, onAddPlayer, onRemovePlayer }: PlayerMa
                 <SelectContent>
                   {roleTypes.map((role) => (
                     <SelectItem key={role} value={role}>
-                      {role}
+                      {roleDisplayNames[role]}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -104,13 +112,13 @@ export function PlayerManager({ players, onAddPlayer, onRemovePlayer }: PlayerMa
               data-testid="button-confirm-add-player"
             >
               <Plus className="h-4 w-4 mr-2" />
-              Add Player
+              إضافة لاعب
             </Button>
           </div>
 
           {players.length > 0 && (
             <div className="space-y-2">
-              <Label>Current Players</Label>
+              <Label>اللاعبون الحاليون</Label>
               <div className="max-h-[300px] overflow-y-auto space-y-2 rounded-md border border-border p-3">
                 {players.map((player) => (
                   <div
@@ -120,7 +128,7 @@ export function PlayerManager({ players, onAddPlayer, onRemovePlayer }: PlayerMa
                   >
                     <div className="flex items-center gap-3">
                       <Badge variant="secondary" className={`${roleColors[player.role]} text-xs`}>
-                        {player.role}
+                        {roleDisplayNames[player.role]}
                       </Badge>
                       <span className="text-sm font-medium">{player.playerName}</span>
                     </div>
@@ -142,7 +150,7 @@ export function PlayerManager({ players, onAddPlayer, onRemovePlayer }: PlayerMa
 
         <DialogFooter>
           <Button variant="outline" onClick={() => setIsOpen(false)} data-testid="button-close-dialog">
-            Close
+            إغلاق
           </Button>
         </DialogFooter>
       </DialogContent>

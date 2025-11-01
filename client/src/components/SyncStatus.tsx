@@ -13,7 +13,7 @@ export function SyncStatus({ isSyncing, lastSyncTime, hasError, errorMessage }: 
     return (
       <div className="flex items-center gap-2" data-testid="sync-status-syncing">
         <Cloud className="h-4 w-4 text-primary animate-pulse" />
-        <span className="text-sm text-muted-foreground">Syncing...</span>
+        <span className="text-sm text-muted-foreground">جارٍ المزامنة...</span>
       </div>
     );
   }
@@ -23,7 +23,7 @@ export function SyncStatus({ isSyncing, lastSyncTime, hasError, errorMessage }: 
       <div className="flex items-center gap-2" data-testid="sync-status-error">
         <Badge variant="destructive" className="gap-1.5">
           <AlertCircle className="h-3 w-3" />
-          <span className="text-xs">{errorMessage || "Sync error"}</span>
+          <span className="text-xs">{errorMessage || "خطأ في المزامنة"}</span>
         </Badge>
       </div>
     );
@@ -35,7 +35,7 @@ export function SyncStatus({ isSyncing, lastSyncTime, hasError, errorMessage }: 
       <div className="flex items-center gap-2" data-testid="sync-status-success">
         <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
         <span className="text-sm text-muted-foreground">
-          Last synced: {timeAgo}
+          آخر مزامنة: {timeAgo}
         </span>
       </div>
     );
@@ -44,7 +44,7 @@ export function SyncStatus({ isSyncing, lastSyncTime, hasError, errorMessage }: 
   return (
     <div className="flex items-center gap-2" data-testid="sync-status-idle">
       <CloudOff className="h-4 w-4 text-muted-foreground" />
-      <span className="text-sm text-muted-foreground">Not connected</span>
+      <span className="text-sm text-muted-foreground">غير متصل</span>
     </div>
   );
 }
@@ -52,8 +52,8 @@ export function SyncStatus({ isSyncing, lastSyncTime, hasError, errorMessage }: 
 function getTimeAgo(date: Date): string {
   const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
 
-  if (seconds < 60) return "now";
-  if (seconds < 3600) return `${Math.floor(seconds / 60)} min ago`;
-  if (seconds < 86400) return `${Math.floor(seconds / 3600)} hr ago`;
-  return `${Math.floor(seconds / 86400)} days ago`;
+  if (seconds < 60) return "الآن";
+  if (seconds < 3600) return `منذ ${Math.floor(seconds / 60)} دقيقة`;
+  if (seconds < 86400) return `منذ ${Math.floor(seconds / 3600)} ساعة`;
+  return `منذ ${Math.floor(seconds / 86400)} يوم`;
 }
