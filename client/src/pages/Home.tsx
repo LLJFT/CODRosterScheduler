@@ -1,0 +1,270 @@
+import { useState, useEffect } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { ScheduleTable } from "@/components/ScheduleTable";
+import { WeekSelector } from "@/components/WeekSelector";
+import { PlayerManager } from "@/components/PlayerManager";
+import { SyncStatus } from "@/components/SyncStatus";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { Save, Share2, Download } from "lucide-react";
+import { startOfWeek, endOfWeek, format } from "date-fns";
+import { ar } from "date-fns/locale";
+import type { PlayerAvailability, DayOfWeek, AvailabilityOption, RoleType } from "@shared/schema";
+import { dayOfWeek } from "@shared/schema";
+import { useToast } from "@/hooks/use-toast";
+import { queryClient, apiRequest } from "@/lib/queryClient";
+import { nanoid } from "nanoid";
+
+export default function Home() {
+  const { toast } = useToast();
+  const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }));
+  const [weekEnd, setWeekEnd] = useState(() => endOfWeek(new Date(), { weekStartsOn: 1 }));
+  const [scheduleData, setScheduleData] = useState<PlayerAvailability[]>([]);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [lastSyncTime, setLastSyncTime] = useState<Date>();
+
+  const weekKey = `${format(weekStart, "yyyy-MM-dd")}_${format(weekEnd, "yyyy-MM-dd")}`;
+
+  const { data: fetchedSchedule, isLoading } = useQuery({
+    queryKey: ["/api/schedule", weekKey],
+  });
+
+  useEffect(() => {
+    if (fetchedSchedule?.scheduleData?.players) {
+      setScheduleData(fetchedSchedule.scheduleData.players);
+      setHasChanges(false);
+      setLastSyncTime(new Date());
+    }
+  }, [fetchedSchedule]);
+
+  const saveMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("POST", "/api/schedule", {
+        weekStartDate: format(weekStart, "yyyy-MM-dd"),
+        weekEndDate: format(weekEnd, "yyyy-MM-dd"),
+        scheduleData: { players: scheduleData },
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/schedule"] });
+      setHasChanges(false);
+      setLastSyncTime(new Date());
+      toast({
+        title: "تم الحفظ بنجاح",
+        description: "تم حفظ الجدول في Google Sheets",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "خطأ في الحفظ",
+        description: error.message || "حدث خطأ أثناء الحفظ",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleWeekChange = (start: Date, end: Date) => {
+    if (hasChanges) {
+      const confirm = window.confirm("لديك تغييرات غير محفوظة. هل تريد المتابعة؟");
+      if (!confirm) return;
+    }
+    setWeekStart(start);
+    setWeekEnd(end);
+    setHasChanges(false);
+  };
+
+  const handleAvailabilityChange = (playerId: string, day: DayOfWeek, availability: AvailabilityOption) => {
+    setScheduleData((prev) =>
+      prev.map((player) =>
+        player.playerId === playerId
+          ? {
+              ...player,
+              availability: {
+                ...player.availability,
+                [day]: availability,
+              },
+            }
+          : player
+      )
+    );
+    setHasChanges(true);
+  };
+
+  const handleAddPlayer = (name: string, role: RoleType) => {
+    const newPlayer: PlayerAvailability = {
+      playerId: nanoid(),
+      playerName: name,
+      role,
+      availability: dayOfWeek.reduce((acc, day) => {
+        acc[day] = "unknown";
+        return acc;
+      }, {} as { [key in DayOfWeek]: AvailabilityOption }),
+    };
+    setScheduleData((prev) => [...prev, newPlayer]);
+    setHasChanges(true);
+    toast({
+      title: "تمت الإضافة",
+      description: `تم إضافة ${name} إلى الجدول`,
+    });
+  };
+
+  const handleRemovePlayer = (playerId: string) => {
+    const player = scheduleData.find((p) => p.playerId === playerId);
+    if (player) {
+      const confirm = window.confirm(`هل تريد حذف ${player.playerName}؟`);
+      if (!confirm) return;
+      
+      setScheduleData((prev) => prev.filter((p) => p.playerId !== playerId));
+      setHasChanges(true);
+      toast({
+        title: "تم الحذف",
+        description: `تم حذف ${player.playerName} من الجدول`,
+      });
+    }
+  };
+
+  const handleShare = async () => {
+    try {
+      const url = window.location.href;
+      await navigator.clipboard.writeText(url);
+      toast({
+        title: "تم النسخ",
+        description: "تم نسخ الرابط إلى الحافظة",
+      });
+    } catch (error) {
+      toast({
+        title: "خطأ",
+        description: "فشل نسخ الرابط",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleExport = () => {
+    window.print();
+  };
+
+  const weekDisplay = `${format(weekStart, "dd.MM")} - ${format(weekEnd, "dd.MM")}`;
+
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-6 max-w-7xl">
+        <div className="space-y-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4 border-b border-border">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground mb-1" data-testid="text-page-title">
+                Marvel Rivals
+              </h1>
+              <p className="text-lg font-semibold text-primary" data-testid="text-week-range">
+                Team Schedule {weekDisplay}
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <SyncStatus
+                isSyncing={saveMutation.isPending}
+                lastSyncTime={lastSyncTime}
+                hasError={saveMutation.isError}
+              />
+              <ThemeToggle />
+            </div>
+          </div>
+
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <WeekSelector
+              weekStart={weekStart}
+              weekEnd={weekEnd}
+              onWeekChange={handleWeekChange}
+            />
+
+            <div className="flex items-center gap-2 flex-wrap">
+              <PlayerManager
+                players={scheduleData}
+                onAddPlayer={handleAddPlayer}
+                onRemovePlayer={handleRemovePlayer}
+              />
+              <Button
+                variant="outline"
+                onClick={handleShare}
+                className="gap-2"
+                data-testid="button-share"
+              >
+                <Share2 className="h-4 w-4" />
+                مشاركة
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleExport}
+                className="gap-2"
+                data-testid="button-export"
+              >
+                <Download className="h-4 w-4" />
+                تصدير
+              </Button>
+              <Button
+                variant="default"
+                onClick={() => saveMutation.mutate()}
+                disabled={!hasChanges || saveMutation.isPending}
+                className="gap-2"
+                data-testid="button-save"
+              >
+                <Save className="h-4 w-4" />
+                {saveMutation.isPending ? "جاري الحفظ..." : "حفظ"}
+              </Button>
+            </div>
+          </div>
+
+          {isLoading ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="text-center space-y-3">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+                <p className="text-muted-foreground">جاري التحميل...</p>
+              </div>
+            </div>
+          ) : (
+            <ScheduleTable
+              scheduleData={scheduleData}
+              onAvailabilityChange={handleAvailabilityChange}
+              isLoading={saveMutation.isPending}
+            />
+          )}
+
+          {hasChanges && (
+            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+              <div className="bg-primary text-primary-foreground px-6 py-3 rounded-lg shadow-lg flex items-center gap-3">
+                <span className="text-sm font-medium">لديك تغييرات غير محفوظة</span>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => saveMutation.mutate()}
+                  disabled={saveMutation.isPending}
+                  data-testid="button-save-floating"
+                >
+                  حفظ الآن
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <style>{`
+        @media print {
+          body * {
+            visibility: hidden;
+          }
+          .container, .container * {
+            visibility: visible;
+          }
+          .container {
+            position: absolute;
+            left: 0;
+            top: 0;
+          }
+          button, .fixed {
+            display: none !important;
+          }
+        }
+      `}</style>
+    </div>
+  );
+}
