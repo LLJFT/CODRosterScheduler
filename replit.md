@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a team schedule and attendance management application for Marvel Rivals esports teams. The application allows team managers to track player availability across different roles (Tank, DPS, Support, Sub, Coach) for weekly practice sessions. It features a weekly calendar view with time block selections, real-time synchronization with Google Sheets, and a Material Design-inspired interface optimized for Arabic (RTL) layouts.
+This is a team schedule and attendance management application for Marvel Rivals esports teams. The application allows team managers to track player availability across different roles (Tank, DPS, Support, Sub, Coach) for weekly practice sessions. It features a weekly calendar view with time block selections, real-time synchronization with Google Sheets, and a Material Design-inspired interface with golden/black theme matching Marvel Rivals branding.
 
 ## User Preferences
 
@@ -10,12 +10,17 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **Full Arabic Localization** (November 1, 2025): Converted entire UI to Arabic with RTL support
-  - All user-facing text translated to Arabic including buttons, labels, form fields, and toast messages
-  - Role names localized: Tank→دبابة, DPS→مهاجم, Support→دعم, Sub→بديل, Coach→مدرب
-  - Day names in Arabic: Monday→الاثنين, Tuesday→الثلاثاء, Wednesday→الأربعاء, etc.
-  - Availability options: unknown→غير معروف, All blocks→كل الأوقات, cannot→غير متاح
-  - RTL direction applied via dir="rtl" on html element for proper right-to-left layout
+- **Professional Google Sheets Formatting** (November 1, 2025): Implemented beautiful formatting for exported schedules
+  - Golden header row (RGB 1, 0.85, 0) with bold text matching app theme
+  - Merged title row with centered text and border
+  - Auto-resized columns for optimal readability
+  - Professional borders on all cells (solid lines with subtle gray for data rows)
+  - Frozen header rows (3 rows) for easy scrolling
+  - Column count calculation uses Math.max across all rows to ensure all columns formatted
+- **English UI** (November 1, 2025): Application uses English language with LTR layout
+  - All UI components in English: buttons, labels, forms, toast messages
+  - HTML direction set to LTR (dir="ltr") for proper left-to-right layout
+  - Clean, professional interface optimized for team managers
 - **Golden Color Theme** (November 1, 2025): Implemented bright golden yellow and black color scheme
   - Primary color: HSL 51 100% 50% (bright golden yellow #FFD700)
   - Dark mode background: HSL 0 0% 5% (nearly pure black)
@@ -47,7 +52,7 @@ Preferred communication style: Simple, everyday language.
 - shadcn/ui component library with Radix UI primitives
 - Tailwind CSS for styling with custom design tokens
 - Material Design principles for data-dense interfaces
-- RTL (right-to-left) layout support for Arabic language
+- LTR (left-to-right) layout for English language
 
 **Design Tokens**:
 - Custom color system with HSL values for theme consistency
@@ -149,6 +154,7 @@ Schedule {
 - Spreadsheet ID persistence: Stored in settings table with key "google_spreadsheet_id"
 - Sheet naming convention: `Week_{weekStartDate}` (tabs within the user's spreadsheet)
 - Data transformation layer to convert between app format and spreadsheet layout
+- Professional formatting: Golden headers, borders, auto-sized columns, frozen rows
 
 **Google APIs Client**:
 - googleapis package for Sheets API v4
@@ -173,7 +179,7 @@ Schedule {
 - embla-carousel for carousel components
 - react-day-picker for calendar widget
 - vaul for drawer components
-- date-fns for date manipulation with Arabic locale support
+- date-fns for date manipulation
 
 **Styling Dependencies**:
 - Tailwind CSS with PostCSS processing
