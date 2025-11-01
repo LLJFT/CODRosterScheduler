@@ -11,7 +11,6 @@ import type { Event } from "@shared/schema";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { EventDialog } from "@/components/EventDialog";
 import { SimpleToast } from "@/components/SimpleToast";
-import "./events-calendar.css";
 
 export default function Events() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
@@ -113,7 +112,44 @@ export default function Events() {
         <div className="grid grid-cols-1 gap-6">
           <Card className="p-8">
             <h2 className="text-xl font-semibold mb-6 text-foreground">Calendar</h2>
-            <div className="calendar-large">
+            <style>{`
+              .events-calendar .rdp {
+                width: 100%;
+              }
+              .events-calendar .rdp-months {
+                width: 100%;
+                justify-content: center;
+              }
+              .events-calendar .rdp-month {
+                width: 100%;
+              }
+              .events-calendar .rdp-table {
+                width: 100%;
+                max-width: none;
+              }
+              .events-calendar .rdp-cell {
+                height: 180px;
+                width: 14.28%;
+                padding: 0;
+                vertical-align: top;
+              }
+              .events-calendar .rdp-day {
+                height: 100%;
+                width: 100%;
+                border-radius: 0;
+                font-size: 16px;
+                padding: 0;
+                align-items: flex-start;
+              }
+              .events-calendar .rdp-day_selected {
+                background-color: hsl(var(--primary) / 0.2);
+                border: 2px solid hsl(var(--primary));
+              }
+              .events-calendar .rdp-day:hover:not(.rdp-day_selected) {
+                background-color: hsl(var(--accent));
+              }
+            `}</style>
+            <div className="events-calendar">
               <Calendar
                 mode="single"
                 selected={selectedDate}
