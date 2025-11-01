@@ -5,12 +5,131 @@ import { Calendar } from "@/components/ui/calendar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2, ArrowLeft } from "lucide-react";
-import { format } from "date-fns";
+import { Plus, Trash2, ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths } from "date-fns";
 import type { Event } from "@shared/schema";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { EventDialog } from "@/components/EventDialog";
 import { SimpleToast } from "@/components/SimpleToast";
+
+interface CustomCalendarProps {
+  selectedDate: Date | undefined;
+  onSelectDate: (date: Date | undefined) => void;
+  eventsByDate: Record<string, Event[]>;
+}
+
+function CustomCalendar({ selectedDate, onSelectDate, eventsByDate }: CustomCalendarProps) {
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+
+  const monthStart = startOfMonth(currentMonth);
+  const monthEnd = endOfMonth(currentMonth);
+  
+  const startDate = new Date(monthStart);
+  startDate.setDate(startDate.getDate() - startDate.getDay());
+  
+  const endDate = new Date(monthEnd);
+  endDate.setDate(endDate.getDate() + (6 - endDate.getDay()));
+
+  const days = eachDayOfInterval({ start: startDate, end: endDate });
+  
+  const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+  return (
+    <div className="w-full" data-testid="calendar-events">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold text-foreground">
+          {format(currentMonth, "MMMM yyyy")}
+        </h3>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+            data-testid="button-prev-month"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+            data-testid="button-next-month"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+
+      <div className="border rounded-md overflow-hidden">
+        <div className="grid grid-cols-7 bg-muted">
+          {weekDays.map((day) => (
+            <div
+              key={day}
+              className="p-2 text-center text-sm font-semibold text-foreground border-r last:border-r-0"
+            >
+              {day}
+            </div>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-7">
+          {days.map((day, idx) => {
+            const dateStr = format(day, "yyyy-MM-dd");
+            const dayEvents = eventsByDate[dateStr] || [];
+            const isSelected = selectedDate && isSameDay(day, selectedDate);
+            const isCurrentMonth = isSameMonth(day, currentMonth);
+
+            return (
+              <div
+                key={idx}
+                onClick={() => onSelectDate(day)}
+                className={`
+                  min-h-[180px] p-2 border-r border-b last:border-r-0
+                  cursor-pointer hover-elevate active-elevate-2
+                  ${!isCurrentMonth ? "bg-muted/30" : ""}
+                  ${isSelected ? "bg-primary/10 border-2 border-primary" : ""}
+                `}
+                data-testid={`calendar-day-${dateStr}`}
+              >
+                <div className={`text-sm font-semibold mb-2 ${!isCurrentMonth ? "text-muted-foreground" : "text-foreground"}`}>
+                  {format(day, "d")}
+                </div>
+                
+                <div className="flex flex-col gap-1 overflow-y-auto max-h-[140px]">
+                  {dayEvents.map((event, eventIdx) => (
+                    <div
+                      key={eventIdx}
+                      className="text-xs px-2 py-1 rounded truncate"
+                      style={{
+                        backgroundColor:
+                          event.eventType === "Tournament"
+                            ? "hsl(51 100% 50%)"
+                            : event.eventType === "Scrim"
+                            ? "hsl(0 0% 30%)"
+                            : "hsl(51 80% 40%)",
+                        color:
+                          event.eventType === "Tournament"
+                            ? "hsl(0 0% 0%)"
+                            : event.eventType === "Scrim"
+                            ? "hsl(51 100% 50%)"
+                            : "hsl(0 0% 0%)",
+                      }}
+                      title={`${event.title}${event.time ? ` - ${event.time}` : ''}`}
+                      data-testid={`calendar-event-${event.id}`}
+                    >
+                      <div className="font-semibold">{event.time || ""}</div>
+                      <div>{event.title}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function Events() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
@@ -112,99 +231,11 @@ export default function Events() {
         <div className="grid grid-cols-1 gap-6">
           <Card className="p-8">
             <h2 className="text-xl font-semibold mb-6 text-foreground">Calendar</h2>
-            <style>{`
-              .events-calendar .rdp {
-                width: 100%;
-              }
-              .events-calendar .rdp-months {
-                width: 100%;
-                justify-content: center;
-              }
-              .events-calendar .rdp-month {
-                width: 100%;
-              }
-              .events-calendar .rdp-table {
-                width: 100%;
-                max-width: none;
-              }
-              .events-calendar .rdp-cell {
-                height: 180px;
-                width: 14.28%;
-                padding: 0;
-                vertical-align: top;
-              }
-              .events-calendar .rdp-day {
-                height: 100%;
-                width: 100%;
-                border-radius: 0;
-                font-size: 16px;
-                padding: 0;
-                align-items: flex-start;
-              }
-              .events-calendar .rdp-day_selected {
-                background-color: hsl(var(--primary) / 0.2);
-                border: 2px solid hsl(var(--primary));
-              }
-              .events-calendar .rdp-day:hover:not(.rdp-day_selected) {
-                background-color: hsl(var(--accent));
-              }
-            `}</style>
-            <div className="events-calendar">
-              <Calendar
-                mode="single"
-                selected={selectedDate}
-                onSelect={setSelectedDate}
-                modifiers={{
-                  hasEvent: datesWithEvents,
-                }}
-                modifiersStyles={{
-                  hasEvent: {
-                    fontWeight: "bold",
-                  },
-                }}
-                className="rounded-md border w-full"
-                data-testid="calendar-events"
-                components={{
-                  DayContent: ({ date }) => {
-                    const dateStr = format(date, "yyyy-MM-dd");
-                    const dayEvents = eventsByDate[dateStr] || [];
-                    return (
-                      <div className="w-full h-full flex flex-col items-start justify-start p-2">
-                        <div className="text-base font-semibold mb-2">{format(date, "d")}</div>
-                        <div className="flex flex-col gap-1 w-full overflow-y-auto max-h-[140px]">
-                          {dayEvents.map((event, idx) => (
-                            <div
-                              key={idx}
-                              className="text-xs px-2 py-1 rounded w-full"
-                              style={{
-                                backgroundColor:
-                                  event.eventType === "Tournament"
-                                    ? "hsl(var(--primary))"
-                                    : event.eventType === "Scrim"
-                                    ? "hsl(var(--secondary))"
-                                    : "hsl(var(--accent))",
-                                color:
-                                  event.eventType === "Tournament"
-                                    ? "hsl(var(--primary-foreground))"
-                                    : event.eventType === "Scrim"
-                                    ? "hsl(var(--secondary-foreground))"
-                                    : "hsl(var(--accent-foreground))",
-                              }}
-                              title={`${event.title}${event.time ? ` - ${event.time}` : ''}`}
-                            >
-                              <div className="font-semibold truncate">{event.title}</div>
-                              {event.time && (
-                                <div className="text-[10px] opacity-90">{event.time}</div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  },
-                }}
-              />
-            </div>
+            <CustomCalendar
+              selectedDate={selectedDate}
+              onSelectDate={setSelectedDate}
+              eventsByDate={eventsByDate}
+            />
           </Card>
 
           <Card className="p-6">
