@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a team schedule and attendance management application for Marvel Rivals esports teams. The application allows team managers to track player availability across different roles (Tank, DPS, Support, Sub, Coach) for weekly practice sessions. It features a weekly calendar view with time block selections, real-time synchronization with Google Sheets, and a Material Design-inspired interface with golden/black theme matching Marvel Rivals branding.
+This is a team schedule and attendance management application for Marvel Rivals esports teams. The application allows team managers to track player availability across different roles (Tank, DPS, Support) for weekly practice sessions. It features a weekly calendar view with time block selections, real-time synchronization with Google Sheets, and a Material Design-inspired interface with golden/black theme matching Marvel Rivals branding.
 
 ## User Preferences
 
@@ -10,6 +10,20 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **Role Simplification** (November 1, 2025): Reduced roles to Tank, DPS, Support only
+  - Removed Sub and Coach roles from all components
+  - Updated schema, PlayerManager, and ScheduleTable
+  - Cleaner role selection with only core competitive roles
+- **Player Edit Functionality** (November 1, 2025): Added ability to edit existing players
+  - Edit button (pencil icon) next to each player in Manage Players dialog
+  - Dialog switches to edit mode showing "Edit Player" title
+  - Pre-fills player name and role for easy modification
+  - Updates player information in real-time
+- **Google Sheets Data Validation** (November 1, 2025): Added dropdown lists in Google Sheets
+  - Time slot dropdowns (unknown, 18:00-20:00 CEST, 20:00-22:00 CEST, All blocks, cannot)
+  - Role dropdowns (Tank, DPS, Support) in column A
+  - Prevents manual entry errors in shared spreadsheets
+  - Applied to current rows plus buffer for future entries
 - **Professional Google Sheets Formatting** (November 1, 2025): Implemented beautiful formatting for exported schedules
   - Golden header row (RGB 1, 0.85, 0) with bold text matching app theme
   - Merged title row with centered text and border
