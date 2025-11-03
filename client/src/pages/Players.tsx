@@ -316,7 +316,9 @@ export default function Players() {
 
   const handleAttendanceSubmit = (data: AttendanceFormData) => {
     if (editingAttendance) {
-      updateAttendanceMutation.mutate({ id: editingAttendance.id, attendance: data });
+      // Exclude playerId when updating (it shouldn't change)
+      const { playerId, ...updateData } = data;
+      updateAttendanceMutation.mutate({ id: editingAttendance.id, attendance: updateData });
     } else {
       createAttendanceMutation.mutate(data);
     }
