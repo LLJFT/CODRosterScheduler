@@ -10,6 +10,26 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **Direct File Upload for Scoreboard Images** (November 3, 2025): Replaced URL input with direct file upload using Replit Object Storage
+  - Implemented ObjectUploader component using Uppy v5.x with dashboard modal interface
+  - File upload flow: Client requests presigned URL → uploads to storage → stores path in database
+  - Image serving via GET /objects/:objectPath endpoint with proper caching headers
+  - Uppy configuration: Single file upload, 10MB max size, image files only
+  - Memory leak prevention: Added useEffect cleanup to properly dispose Uppy instances on unmount
+  - Object storage setup: Default bucket with public search paths and private directory
+  - API endpoints: POST /api/objects/upload (presigned URL generation)
+  - Games table imageUrl stores object paths (e.g., /objects/uploads/{uuid})
+- **Events Results Page** (November 3, 2025): New dedicated page for viewing event outcomes
+  - New `/results` route displaying upcoming and past events with filtering
+  - Smart event classification: Same-day events with future times appear in "Upcoming"
+  - Events without time treated as upcoming if date is today or future
+  - Upcoming events sorted chronologically (earliest first)
+  - Past events sorted reverse chronologically (most recent first)
+  - Result badges: Win (default variant), Loss (destructive), Draw (secondary), Pending (outline)
+  - Event type badges with color coding: Tournament (yellow), Scrim (blue), VOD Review (purple)
+  - Navigation: "Results" button added to Home page toolbar
+  - Display format: Date as "MMM dd, yyyy", opponent name, result badge, event type badge
+  - Eye icon button navigates to full event details page
 - **Event Details Page - English Conversion & Image Support** (November 3, 2025): Comprehensive event tracking with game results and scoreboard images
   - New `/events/:id` route for detailed event information
   - All UI text converted to English (labels, buttons, placeholders, toasts)
