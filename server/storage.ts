@@ -1,5 +1,5 @@
-import type { Player, InsertPlayer, Schedule, InsertSchedule, Setting, InsertSetting, Event, InsertEvent, Attendance, InsertAttendance, TeamNotes, InsertTeamNotes } from "@shared/schema";
-import { players, schedules, settings, events, attendance, teamNotes } from "@shared/schema";
+import type { Player, InsertPlayer, Schedule, InsertSchedule, Setting, InsertSetting, Event, InsertEvent, Attendance, InsertAttendance, TeamNotes, InsertTeamNotes, Game, InsertGame } from "@shared/schema";
+import { players, schedules, settings, events, attendance, teamNotes, games } from "@shared/schema";
 import { db } from "./db";
 import { eq, and } from "drizzle-orm";
 
@@ -25,6 +25,10 @@ export interface IStorage {
   getTeamNotes(): Promise<TeamNotes[]>;
   addTeamNote(note: InsertTeamNotes): Promise<TeamNotes>;
   deleteTeamNote(id: string): Promise<boolean>;
+  getGamesByEventId(eventId: string): Promise<Game[]>;
+  addGame(game: InsertGame): Promise<Game>;
+  updateGame(id: string, game: Partial<InsertGame>): Promise<Game>;
+  removeGame(id: string): Promise<boolean>;
 }
 
 export class DbStorage implements IStorage {
@@ -231,6 +235,41 @@ export class DbStorage implements IStorage {
     const deleted = await db
       .delete(teamNotes)
       .where(eq(teamNotes.id, id))
+      .returning();
+
+    return deleted.length > 0;
+  }
+
+  async getGamesByEventId(eventId: string): Promise<Game[]> {
+    return await db
+      .select()
+      .from(games)
+      .where(eq(games.eventId, eventId));
+  }
+
+  async addGame(insertGame: InsertGame): Promise<Game> {
+    const inserted = await db
+      .insert(games)
+      .values(insertGame)
+      .returning();
+
+    return inserted[0];
+  }
+
+  async updateGame(id: string, updateData: Partial<InsertGame>): Promise<Game> {
+    const updated = await db
+      .update(games)
+      .set(updateData)
+      .where(eq(games.id, id))
+      .returning();
+
+    return updated[0];
+  }
+
+  async removeGame(id: string): Promise<boolean> {
+    const deleted = await db
+      .delete(games)
+      .where(eq(games.id, id))
       .returning();
 
     return deleted.length > 0;
