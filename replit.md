@@ -10,14 +10,17 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **Event Details Page** (November 3, 2025): Comprehensive event tracking with game results and scoreboard
+- **Event Details Page - English Conversion & Image Support** (November 3, 2025): Comprehensive event tracking with game results and scoreboard images
   - New `/events/:id` route for detailed event information
+  - All UI text converted to English (labels, buttons, placeholders, toasts)
   - Event details form: result (win/loss/draw/pending), opponent name, notes
-  - Games management: add, edit, delete individual games with codes and scores
-  - Scoreboard table: displays all games for an event with codes and results
+  - Games management: add, edit, delete individual games with codes, scores, and scoreboard images
+  - Scoreboard table: displays all games with codes, results, and image viewer
+  - Image viewing modal: click "View" button to see full scoreboard images
   - Navigation: Eye icon button on Events calendar leads to details page
-  - Schema updates: `events` table with result/opponentName/notes, new `games` table with eventId (FK), gameCode, score
+  - Schema updates: `events` table with result/opponentName/notes, `games` table with eventId (FK), gameCode, score, imageUrl
   - API endpoints: GET /api/events/:eventId/games, POST/PUT/DELETE /api/games/:id
+  - Full CRUD permissions: Users can delete or edit any event detail or game
 - **Team Notes Messaging System** (November 3, 2025): Implemented message-based team communication
   - Message posting interface: Users enter their name and message content
   - Chronological message table: Shows sender, message, timestamp, and delete action
