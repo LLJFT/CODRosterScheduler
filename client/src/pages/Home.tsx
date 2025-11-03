@@ -9,7 +9,7 @@ import { SyncStatus } from "@/components/SyncStatus";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { AvailabilityAnalytics } from "@/components/AvailabilityAnalytics";
 import { SimpleToast } from "@/components/SimpleToast";
-import { Save, Share2, Download, Calendar, Users } from "lucide-react";
+import { Save, Share2, Download, Calendar, Users, Trophy } from "lucide-react";
 import { startOfWeek, endOfWeek, format } from "date-fns";
 import type { PlayerAvailability, DayOfWeek, AvailabilityOption, RoleType } from "@shared/schema";
 import { dayOfWeek } from "@shared/schema";
@@ -224,6 +224,16 @@ export default function Home() {
                 >
                   <Calendar className="h-4 w-4" />
                   Events
+                </Button>
+              </Link>
+              <Link href="/results">
+                <Button
+                  variant="outline"
+                  className="gap-2"
+                  data-testid="button-results"
+                >
+                  <Trophy className="h-4 w-4" />
+                  Results
                 </Button>
               </Link>
               <Link href="/players">
