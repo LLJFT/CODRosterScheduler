@@ -5,7 +5,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2, ArrowLeft, ChevronLeft, ChevronRight, Pencil } from "lucide-react";
+import { Plus, Trash2, ArrowLeft, ChevronLeft, ChevronRight, Pencil, Eye } from "lucide-react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths } from "date-fns";
 import type { Event } from "@shared/schema";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -308,6 +308,15 @@ export default function Events() {
                         )}
                       </div>
                       <div className="flex gap-2">
+                        <Link href={`/events/${event.id}`}>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            data-testid={`button-view-details-${event.id}`}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                        </Link>
                         <Button
                           variant="ghost"
                           size="icon"
