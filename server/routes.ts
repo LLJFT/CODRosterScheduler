@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertScheduleSchema, insertEventSchema, insertPlayerSchema, insertAttendanceSchema } from "@shared/schema";
+import { insertScheduleSchema, insertEventSchema, insertPlayerSchema, insertAttendanceSchema, insertTeamNotesSchema } from "@shared/schema";
 import { 
   readScheduleFromSheet, 
   writeScheduleToSheet, 
@@ -261,6 +261,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error: any) {
       console.error('Error in DELETE /api/attendance:', error);
+      res.status(500).json({ error: error.message || "Internal server error" });
+    }
+  });
+
+  app.get("/api/team-notes", async (req, res) => {
+    try {
+      const notes = await storage.getTeamNotes();
+      res.json(notes || { notes: "", requirements: "", obstacles: "", lastUpdated: new Date().toISOString() });
+    } catch (error: any) {
+      console.error('Error in GET /api/team-notes:', error);
+      res.status(500).json({ error: error.message || "Internal server error" });
+    }
+  });
+
+  app.post("/api/team-notes", async (req, res) => {
+    try {
+      const validatedData = insertTeamNotesSchema.parse(req.body);
+      const notes = await storage.saveTeamNotes(validatedData);
+      res.json(notes);
+    } catch (error: any) {
+      console.error('Error in POST /api/team-notes:', error);
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ error: "Invalid team notes data", details: error.errors });
+      }
       res.status(500).json({ error: error.message || "Internal server error" });
     }
   });
