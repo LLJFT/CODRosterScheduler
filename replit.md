@@ -10,6 +10,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **Team Notes Messaging System** (November 3, 2025): Implemented message-based team communication
+  - Message posting interface: Users enter their name and message content
+  - Chronological message table: Shows sender, message, timestamp, and delete action
+  - Accurate timestamps: Generated at submission time (not component mount) with second-level precision
+  - Timestamp display: Format "MMM dd, yyyy" and "hh:mm:ss a" shows exact send time
+  - Real-time updates: Messages appear immediately with automatic cache invalidation
+  - Schema: `team_notes` table with senderName, message, timestamp (ISO format)
+  - API endpoints: GET/POST/DELETE for team notes management
 - **Player Management Page** (November 3, 2025): Added comprehensive player management with attendance tracking
   - New `/players` route for managing detailed player information and attendance records
   - Enhanced player data: nickname, full name, phone number, Snapchat username
@@ -19,6 +27,7 @@ Preferred communication style: Simple, everyday language.
   - Visual status badges: Green for attended, yellow for late, red for absent
   - Per-player attendance history with sortable records
   - Navigation link in main schedule header
+  - Team Notes section: Message board for team communication
 - **Double-Click Event Editing** (November 3, 2025): Enhanced calendar interactions
   - Double-click on existing event to open edit dialog directly
   - Double-click on empty day cell to create new event for that date
@@ -139,6 +148,9 @@ Preferred communication style: Simple, everyday language.
 - `POST /api/attendance` - Create attendance record
 - `PUT /api/attendance/:id` - Update attendance record
 - `DELETE /api/attendance/:id` - Delete attendance record
+- `GET /api/team-notes` - Fetch all team notes messages
+- `POST /api/team-notes` - Create new team note message
+- `DELETE /api/team-notes/:id` - Delete team note message
 
 **Data Flow Pattern**:
 1. Client requests schedule by week range
@@ -167,7 +179,8 @@ Preferred communication style: Simple, everyday language.
 - `schedules` table: id, weekStartDate, weekEndDate, scheduleData (JSONB), googleSheetId
 - `settings` table: id, key (unique), value - Stores application settings including Google Sheets spreadsheet ID
 - `events` table: id, title, eventType (Tournament/Scrim/VOD Review), date, time, description - Stores team events for calendar view
-- `attendance` table: id, playerId (FK to players), date, status (attended/late/absent), notes - Tracks player attendance records
+- `attendance` table: id, playerId (FK to players), date, status (attended/late/absent), notes, ringer - Tracks player attendance records with optional substitute player
+- `team_notes` table: id, senderName, message, timestamp (ISO format) - Stores team communication messages
 
 **Schema Design Philosophy**:
 - JSONB column for flexible schedule data structure
