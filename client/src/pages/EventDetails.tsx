@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Plus, Trash2, Save } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Save, Upload, Eye } from "lucide-react";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
@@ -32,8 +32,10 @@ export default function EventDetails() {
 
   const [newGameCode, setNewGameCode] = useState("");
   const [newGameScore, setNewGameScore] = useState("");
+  const [newGameImageUrl, setNewGameImageUrl] = useState("");
 
   const [editingGame, setEditingGame] = useState<Game | null>(null);
+  const [viewingImage, setViewingImage] = useState<string | null>(null);
 
   const { data: event, isLoading: eventLoading } = useQuery<Event>({
     queryKey: ["/api/events", eventId],
@@ -66,13 +68,13 @@ export default function EventDetails() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
       queryClient.invalidateQueries({ queryKey: ["/api/events", eventId] });
-      setToastMessage("تم حفظ تفاصيل الحدث");
+      setToastMessage("Event details saved");
       setToastType("success");
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
     },
     onError: (error: any) => {
-      setToastMessage(error.message || "فشل حفظ التفاصيل");
+      setToastMessage(error.message || "Failed to save details");
       setToastType("error");
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
@@ -88,13 +90,14 @@ export default function EventDetails() {
       queryClient.invalidateQueries({ queryKey: ["/api/events", eventId, "games"] });
       setNewGameCode("");
       setNewGameScore("");
-      setToastMessage("تمت إضافة اللعبة");
+      setNewGameImageUrl("");
+      setToastMessage("Game added successfully");
       setToastType("success");
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
     },
     onError: (error: any) => {
-      setToastMessage(error.message || "فشل إضافة اللعبة");
+      setToastMessage(error.message || "Failed to add game");
       setToastType("error");
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
@@ -109,13 +112,13 @@ export default function EventDetails() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events", eventId, "games"] });
       setEditingGame(null);
-      setToastMessage("تم تحديث اللعبة");
+      setToastMessage("Game updated successfully");
       setToastType("success");
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
     },
     onError: (error: any) => {
-      setToastMessage(error.message || "فشل تحديث اللعبة");
+      setToastMessage(error.message || "Failed to update game");
       setToastType("error");
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
@@ -129,13 +132,13 @@ export default function EventDetails() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events", eventId, "games"] });
-      setToastMessage("تم حذف اللعبة");
+      setToastMessage("Game deleted successfully");
       setToastType("success");
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
     },
     onError: (error: any) => {
-      setToastMessage(error.message || "فشل حذف اللعبة");
+      setToastMessage(error.message || "Failed to delete game");
       setToastType("error");
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
@@ -152,7 +155,7 @@ export default function EventDetails() {
 
   const handleAddGame = () => {
     if (!newGameCode.trim() || !newGameScore.trim()) {
-      setToastMessage("الرجاء إدخال كود اللعبة والنتيجة");
+      setToastMessage("Please enter game code and score");
       setToastType("error");
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
@@ -163,6 +166,7 @@ export default function EventDetails() {
       eventId: eventId,
       gameCode: newGameCode,
       score: newGameScore,
+      imageUrl: newGameImageUrl.trim() || undefined,
     });
   };
 
@@ -173,12 +177,13 @@ export default function EventDetails() {
       game: {
         gameCode: editingGame.gameCode,
         score: editingGame.score,
+        imageUrl: editingGame.imageUrl || undefined,
       },
     });
   };
 
   const handleDeleteGame = (id: string) => {
-    if (confirm("هل أنت متأكد من حذف هذه اللعبة؟")) {
+    if (confirm("Are you sure you want to delete this game?")) {
       deleteGameMutation.mutate(id);
     }
   };
@@ -199,22 +204,22 @@ export default function EventDetails() {
   const getResultText = (result: string) => {
     switch (result) {
       case "win":
-        return "فوز";
+        return "Win";
       case "loss":
-        return "خسارة";
+        return "Loss";
       case "draw":
-        return "تعادل";
+        return "Draw";
       case "pending":
-        return "معلق";
+        return "Pending";
       default:
-        return "غير محدد";
+        return "Not Set";
     }
   };
 
   if (eventLoading || gamesLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">جاري التحميل...</div>
+        <div className="text-lg">Loading...</div>
       </div>
     );
   }
@@ -222,11 +227,11 @@ export default function EventDetails() {
   if (!event) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4">
-        <div className="text-lg">الحدث غير موجود</div>
+        <div className="text-lg">Event not found</div>
         <Link href="/events">
           <Button data-testid="button-back-to-events">
-            <ArrowLeft className="h-4 w-4 ml-2" />
-            العودة للأحداث
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Events
           </Button>
         </Link>
       </div>
@@ -234,7 +239,7 @@ export default function EventDetails() {
   }
 
   return (
-    <div className="min-h-screen p-6" dir="rtl">
+    <div className="min-h-screen p-6">
       <div className="max-w-6xl mx-auto space-y-6">
         {showToast && (
           <div
@@ -247,11 +252,26 @@ export default function EventDetails() {
           </div>
         )}
 
+        {viewingImage && (
+          <div
+            className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
+            onClick={() => setViewingImage(null)}
+          >
+            <div className="max-w-4xl max-h-full">
+              <img
+                src={viewingImage}
+                alt="Scoreboard"
+                className="max-w-full max-h-[90vh] object-contain rounded-lg"
+              />
+            </div>
+          </div>
+        )}
+
         <div className="flex items-center justify-between">
           <Link href="/events">
             <Button variant="outline" data-testid="button-back">
-              <ArrowLeft className="h-4 w-4 ml-2" />
-              العودة للأحداث
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Events
             </Button>
           </Link>
         </div>
@@ -261,7 +281,7 @@ export default function EventDetails() {
             <CardTitle className="text-2xl" data-testid="text-event-title">
               {event.title}
             </CardTitle>
-            <div className="flex gap-2 items-center">
+            <div className="flex gap-2 items-center flex-wrap">
               <Badge variant="outline" data-testid="badge-event-type">
                 {event.eventType}
               </Badge>
@@ -287,39 +307,39 @@ export default function EventDetails() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-2">نتيجة الحدث</label>
+              <label className="block text-sm font-medium mb-2">Event Result</label>
               <Select
                 value={eventResult}
                 onValueChange={(value) => setEventResult(value as EventResult)}
               >
                 <SelectTrigger data-testid="select-result">
-                  <SelectValue placeholder="اختر النتيجة" />
+                  <SelectValue placeholder="Select result" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="pending">معلق</SelectItem>
-                  <SelectItem value="win">فوز</SelectItem>
-                  <SelectItem value="loss">خسارة</SelectItem>
-                  <SelectItem value="draw">تعادل</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="win">Win</SelectItem>
+                  <SelectItem value="loss">Loss</SelectItem>
+                  <SelectItem value="draw">Draw</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">اسم الخصم</label>
+              <label className="block text-sm font-medium mb-2">Opponent Name</label>
               <Input
                 value={opponentName}
                 onChange={(e) => setOpponentName(e.target.value)}
-                placeholder="أدخل اسم الفريق الخصم"
+                placeholder="Enter opponent team name"
                 data-testid="input-opponent"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">ملاحظات</label>
+              <label className="block text-sm font-medium mb-2">Notes</label>
               <Textarea
                 value={eventNotes}
                 onChange={(e) => setEventNotes(e.target.value)}
-                placeholder="أدخل أي ملاحظات حول الحدث..."
+                placeholder="Enter any notes about the event..."
                 rows={4}
                 data-testid="textarea-notes"
               />
@@ -330,55 +350,62 @@ export default function EventDetails() {
               disabled={updateEventMutation.isPending}
               data-testid="button-save-details"
             >
-              <Save className="h-4 w-4 ml-2" />
-              {updateEventMutation.isPending ? "جاري الحفظ..." : "حفظ التفاصيل"}
+              <Save className="h-4 w-4 mr-2" />
+              {updateEventMutation.isPending ? "Saving..." : "Save Details"}
             </Button>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>الألعاب والنتائج</CardTitle>
+            <CardTitle>Games & Scoreboard</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <label className="block text-sm font-medium">إضافة لعبة جديدة</label>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+              <label className="block text-sm font-medium">Add New Game</label>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
                 <Input
                   value={newGameCode}
                   onChange={(e) => setNewGameCode(e.target.value)}
-                  placeholder="كود اللعبة"
+                  placeholder="Game Code"
                   data-testid="input-new-game-code"
                 />
                 <Input
                   value={newGameScore}
                   onChange={(e) => setNewGameScore(e.target.value)}
-                  placeholder="النتيجة (مثال: 2-1)"
+                  placeholder="Score (e.g., 2-1)"
                   data-testid="input-new-game-score"
+                />
+                <Input
+                  value={newGameImageUrl}
+                  onChange={(e) => setNewGameImageUrl(e.target.value)}
+                  placeholder="Image URL (optional)"
+                  data-testid="input-new-game-image"
                 />
                 <Button
                   onClick={handleAddGame}
                   disabled={addGameMutation.isPending}
                   data-testid="button-add-game"
                 >
-                  <Plus className="h-4 w-4 ml-2" />
-                  إضافة
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add
                 </Button>
               </div>
             </div>
 
             {games.length === 0 ? (
               <div className="text-center text-muted-foreground py-8" data-testid="text-no-games">
-                لا توجد ألعاب مسجلة
+                No games recorded
               </div>
             ) : (
-              <div className="border rounded-md">
+              <div className="border rounded-md overflow-x-auto">
                 <table className="w-full">
                   <thead className="bg-muted">
                     <tr>
-                      <th className="p-3 text-right font-semibold">كود اللعبة</th>
-                      <th className="p-3 text-right font-semibold">النتيجة</th>
-                      <th className="p-3 text-right font-semibold">الإجراءات</th>
+                      <th className="p-3 text-left font-semibold">Game Code</th>
+                      <th className="p-3 text-left font-semibold">Score</th>
+                      <th className="p-3 text-left font-semibold">Scoreboard Image</th>
+                      <th className="p-3 text-left font-semibold">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -411,7 +438,31 @@ export default function EventDetails() {
                           )}
                         </td>
                         <td className="p-3">
-                          <div className="flex gap-2">
+                          {editingGame?.id === game.id ? (
+                            <Input
+                              value={editingGame.imageUrl || ""}
+                              onChange={(e) =>
+                                setEditingGame({ ...editingGame, imageUrl: e.target.value })
+                              }
+                              placeholder="Image URL"
+                              data-testid={`input-edit-image-${game.id}`}
+                            />
+                          ) : game.imageUrl ? (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setViewingImage(game.imageUrl || null)}
+                              data-testid={`button-view-image-${game.id}`}
+                            >
+                              <Eye className="h-4 w-4 mr-2" />
+                              View
+                            </Button>
+                          ) : (
+                            <span className="text-muted-foreground text-sm">No image</span>
+                          )}
+                        </td>
+                        <td className="p-3">
+                          <div className="flex gap-2 flex-wrap">
                             {editingGame?.id === game.id ? (
                               <>
                                 <Button
@@ -420,7 +471,7 @@ export default function EventDetails() {
                                   disabled={updateGameMutation.isPending}
                                   data-testid={`button-save-game-${game.id}`}
                                 >
-                                  حفظ
+                                  Save
                                 </Button>
                                 <Button
                                   size="sm"
@@ -428,7 +479,7 @@ export default function EventDetails() {
                                   onClick={() => setEditingGame(null)}
                                   data-testid={`button-cancel-edit-${game.id}`}
                                 >
-                                  إلغاء
+                                  Cancel
                                 </Button>
                               </>
                             ) : (
@@ -439,7 +490,7 @@ export default function EventDetails() {
                                   onClick={() => setEditingGame(game)}
                                   data-testid={`button-edit-game-${game.id}`}
                                 >
-                                  تعديل
+                                  Edit
                                 </Button>
                                 <Button
                                   size="sm"
