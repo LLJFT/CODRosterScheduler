@@ -25,6 +25,8 @@ export const dayOfWeek = [
 
 export const eventTypes = ["Tournament", "Scrim", "VOD Review"] as const;
 
+export const eventResults = ["win", "loss", "draw", "pending"] as const;
+
 export const attendanceStatuses = ["attended", "late", "absent"] as const;
 
 export const players = pgTable("players", {
@@ -73,6 +75,16 @@ export const events = pgTable("events", {
   date: text("date").notNull(),
   time: text("time"),
   description: text("description"),
+  result: text("result"),
+  opponentName: text("opponent_name"),
+  notes: text("notes"),
+});
+
+export const games = pgTable("games", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  eventId: varchar("event_id").notNull().references(() => events.id, { onDelete: "cascade" }),
+  gameCode: text("game_code").notNull(),
+  score: text("score").notNull(),
 });
 
 export const insertPlayerSchema = createInsertSchema(players).omit({
@@ -99,10 +111,15 @@ export const insertTeamNotesSchema = createInsertSchema(teamNotes).omit({
   id: true,
 });
 
+export const insertGameSchema = createInsertSchema(games).omit({
+  id: true,
+});
+
 export type AvailabilityOption = typeof availabilityOptions[number];
 export type RoleType = typeof roleTypes[number];
 export type DayOfWeek = typeof dayOfWeek[number];
 export type EventType = typeof eventTypes[number];
+export type EventResult = typeof eventResults[number];
 export type AttendanceStatus = typeof attendanceStatuses[number];
 
 export type Player = typeof players.$inferSelect;
@@ -122,6 +139,9 @@ export type InsertAttendance = z.infer<typeof insertAttendanceSchema>;
 
 export type TeamNotes = typeof teamNotes.$inferSelect;
 export type InsertTeamNotes = z.infer<typeof insertTeamNotesSchema>;
+
+export type Game = typeof games.$inferSelect;
+export type InsertGame = z.infer<typeof insertGameSchema>;
 
 export interface PlayerAvailability {
   playerId: string;
