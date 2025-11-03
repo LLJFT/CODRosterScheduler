@@ -47,10 +47,9 @@ export const attendance = pgTable("attendance", {
 
 export const teamNotes = pgTable("team_notes", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  notes: text("notes"),
-  requirements: text("requirements"),
-  obstacles: text("obstacles"),
-  lastUpdated: text("last_updated").notNull(),
+  senderName: text("sender_name").notNull(),
+  message: text("message").notNull(),
+  timestamp: text("timestamp").notNull(),
 });
 
 export const schedules = pgTable("schedules", {
