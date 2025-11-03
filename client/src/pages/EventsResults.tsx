@@ -4,7 +4,7 @@ import type { Event } from "@shared/schema";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { format, parseISO, isFuture } from "date-fns";
+import { format, parseISO, isAfter, startOfDay } from "date-fns";
 import { Calendar, Trophy, Eye } from "lucide-react";
 
 export default function EventsResults() {
@@ -13,13 +13,31 @@ export default function EventsResults() {
   });
 
   const now = new Date();
-  const upcomingEvents = events.filter((event) =>
-    isFuture(parseISO(event.date))
-  ).sort((a, b) => parseISO(a.date).getTime() - parseISO(b.date).getTime());
+  const todayStart = startOfDay(now);
+  
+  const isEventUpcoming = (event: Event) => {
+    const eventDate = parseISO(event.date);
+    if (event.time) {
+      const [hours, minutes] = event.time.split(':').map(Number);
+      eventDate.setHours(hours, minutes, 0, 0);
+      return isAfter(eventDate, now);
+    }
+    return isAfter(eventDate, todayStart) || eventDate.getTime() === todayStart.getTime();
+  };
 
-  const pastEvents = events.filter((event) =>
-    !isFuture(parseISO(event.date))
-  ).sort((a, b) => parseISO(b.date).getTime() - parseISO(a.date).getTime());
+  const upcomingEvents = events.filter(isEventUpcoming)
+    .sort((a, b) => {
+      const dateA = parseISO(a.date);
+      const dateB = parseISO(b.date);
+      return dateA.getTime() - dateB.getTime();
+    });
+
+  const pastEvents = events.filter((event) => !isEventUpcoming(event))
+    .sort((a, b) => {
+      const dateA = parseISO(a.date);
+      const dateB = parseISO(b.date);
+      return dateB.getTime() - dateA.getTime();
+    });
 
   const getResultBadgeVariant = (result: string) => {
     switch (result) {
