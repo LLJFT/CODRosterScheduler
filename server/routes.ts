@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertScheduleSchema, insertEventSchema, insertPlayerSchema, insertAttendanceSchema, insertTeamNotesSchema } from "@shared/schema";
+import { insertScheduleSchema, insertEventSchema, insertPlayerSchema, insertAttendanceSchema, insertTeamNotesSchema, insertGameSchema } from "@shared/schema";
 import { 
   readScheduleFromSheet, 
   writeScheduleToSheet, 
@@ -300,6 +300,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error: any) {
       console.error('Error in DELETE /api/team-notes:', error);
+      res.status(500).json({ error: error.message || "Internal server error" });
+    }
+  });
+
+  app.get("/api/events/:eventId/games", async (req, res) => {
+    try {
+      const { eventId } = req.params;
+      const games = await storage.getGamesByEventId(eventId);
+      res.json(games);
+    } catch (error: any) {
+      console.error('Error in GET /api/events/:eventId/games:', error);
+      res.status(500).json({ error: error.message || "Internal server error" });
+    }
+  });
+
+  app.post("/api/games", async (req, res) => {
+    try {
+      const validatedData = insertGameSchema.parse(req.body);
+      const game = await storage.addGame(validatedData);
+      res.json(game);
+    } catch (error: any) {
+      console.error('Error in POST /api/games:', error);
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ error: "Invalid game data", details: error.errors });
+      }
+      res.status(500).json({ error: error.message || "Internal server error" });
+    }
+  });
+
+  app.put("/api/games/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const validatedData = insertGameSchema.partial().parse(req.body);
+      const game = await storage.updateGame(id, validatedData);
+      res.json(game);
+    } catch (error: any) {
+      console.error('Error in PUT /api/games:', error);
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ error: "Invalid game data", details: error.errors });
+      }
+      res.status(500).json({ error: error.message || "Internal server error" });
+    }
+  });
+
+  app.delete("/api/games/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const success = await storage.removeGame(id);
+      if (success) {
+        res.json({ success: true });
+      } else {
+        res.status(404).json({ error: "Game not found" });
+      }
+    } catch (error: any) {
+      console.error('Error in DELETE /api/games:', error);
       res.status(500).json({ error: error.message || "Internal server error" });
     }
   });
