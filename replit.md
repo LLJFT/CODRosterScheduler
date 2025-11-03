@@ -10,12 +10,26 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **Player Management Page** (November 3, 2025): Added comprehensive player management with attendance tracking
+  - New `/players` route for managing detailed player information and attendance records
+  - Enhanced player data: nickname, full name, phone number, Snapchat username
+  - Attendance tracking system: date-based records with status (attended/late/absent) and explanatory notes
+  - Player information editing: Admin can update all player details anytime
+  - Attendance CRUD operations: Create, read, update, delete attendance records
+  - Visual status badges: Green for attended, yellow for late, red for absent
+  - Per-player attendance history with sortable records
+  - Navigation link in main schedule header
+- **Double-Click Event Editing** (November 3, 2025): Enhanced calendar interactions
+  - Double-click on existing event to open edit dialog directly
+  - Double-click on empty day cell to create new event for that date
+  - Automatic date pre-fill when creating from day cell
+  - Improved user workflow for faster event management
 - **Events Calendar Page** (November 1, 2025): Added dedicated calendar page for team events
   - New `/events` route with calendar view for tournaments, scrims, and VOD reviews
   - Interactive calendar with date selection and event indicators
   - Event creation dialog with event type (Tournament/Scrim/VOD Review), title, date, time, and description
   - Events stored in PostgreSQL database with full CRUD operations
-  - Navigation between Schedule and Events pages via header buttons
+  - Navigation between Schedule, Events, and Players pages via header buttons
   - Pure black background with golden accents matching main app theme
 - **Role Simplification** (November 1, 2025): Reduced roles to Tank, DPS, Support only
   - Removed Sub and Coach roles from all components
@@ -114,11 +128,17 @@ Preferred communication style: Simple, everyday language.
 - `POST /api/schedule` - Save/update schedule data
 - `GET /api/players` - Fetch all players
 - `POST /api/players` - Add new player
+- `PUT /api/players/:id` - Update player information
 - `DELETE /api/players/:id` - Remove player
 - `GET /api/spreadsheet-info` - Get user's Google Sheets spreadsheet ID and URL
 - `GET /api/events` - Fetch all team events
 - `POST /api/events` - Create new event
+- `PUT /api/events/:id` - Update event
 - `DELETE /api/events/:id` - Delete event
+- `GET /api/attendance` - Fetch all attendance records
+- `POST /api/attendance` - Create attendance record
+- `PUT /api/attendance/:id` - Update attendance record
+- `DELETE /api/attendance/:id` - Delete attendance record
 
 **Data Flow Pattern**:
 1. Client requests schedule by week range
@@ -143,10 +163,11 @@ Preferred communication style: Simple, everyday language.
 **Primary Storage**: PostgreSQL database (production-ready persistent storage)
 
 **Database Schema** (prepared for PostgreSQL via Drizzle ORM):
-- `players` table: id, name, role
+- `players` table: id, name, role, fullName, phone, snapchat - Player information with contact details
 - `schedules` table: id, weekStartDate, weekEndDate, scheduleData (JSONB), googleSheetId
 - `settings` table: id, key (unique), value - Stores application settings including Google Sheets spreadsheet ID
 - `events` table: id, title, eventType (Tournament/Scrim/VOD Review), date, time, description - Stores team events for calendar view
+- `attendance` table: id, playerId (FK to players), date, status (attended/late/absent), notes - Tracks player attendance records
 
 **Schema Design Philosophy**:
 - JSONB column for flexible schedule data structure
