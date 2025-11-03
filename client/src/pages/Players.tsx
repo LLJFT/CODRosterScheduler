@@ -95,7 +95,7 @@ export default function Players() {
     defaultValues: {
       senderName: "",
       message: "",
-      timestamp: new Date().toISOString(),
+      timestamp: "",
     },
   });
 
@@ -492,7 +492,7 @@ export default function Players() {
                         <td className="p-3 text-foreground whitespace-pre-wrap">{note.message}</td>
                         <td className="p-3 text-muted-foreground text-sm">
                           <div>{format(new Date(note.timestamp), "MMM dd, yyyy")}</div>
-                          <div className="text-xs">{format(new Date(note.timestamp), "hh:mm a")}</div>
+                          <div className="text-xs">{format(new Date(note.timestamp), "hh:mm:ss a")}</div>
                         </td>
                         <td className="p-3 text-right">
                           <Button
