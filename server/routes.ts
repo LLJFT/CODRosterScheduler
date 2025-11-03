@@ -102,6 +102,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/players", async (req, res) => {
+    try {
+      const validatedData = insertPlayerSchema.parse(req.body);
+      const player = await storage.addPlayer(validatedData);
+      res.json(player);
+    } catch (error: any) {
+      console.error('Error in POST /api/players:', error);
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ error: "Invalid player data", details: error.errors });
+      }
+      res.status(500).json({ error: error.message || "Internal server error" });
+    }
+  });
+
+  app.delete("/api/players/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const success = await storage.removePlayer(id);
+      if (success) {
+        res.json({ success: true });
+      } else {
+        res.status(404).json({ error: "Player not found" });
+      }
+    } catch (error: any) {
+      console.error('Error in DELETE /api/players:', error);
+      res.status(500).json({ error: error.message || "Internal server error" });
+    }
+  });
+
   app.get("/api/spreadsheet-info", async (req, res) => {
     try {
       const spreadsheetId = await getSpreadsheetId();
