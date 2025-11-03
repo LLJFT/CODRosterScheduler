@@ -85,6 +85,7 @@ export const games = pgTable("games", {
   eventId: varchar("event_id").notNull().references(() => events.id, { onDelete: "cascade" }),
   gameCode: text("game_code").notNull(),
   score: text("score").notNull(),
+  imageUrl: text("image_url"),
 });
 
 export const insertPlayerSchema = createInsertSchema(players).omit({
