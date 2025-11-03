@@ -268,7 +268,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/team-notes", async (req, res) => {
     try {
       const notes = await storage.getTeamNotes();
-      res.json(notes || { notes: "", requirements: "", obstacles: "", lastUpdated: new Date().toISOString() });
+      res.json(notes);
     } catch (error: any) {
       console.error('Error in GET /api/team-notes:', error);
       res.status(500).json({ error: error.message || "Internal server error" });
@@ -278,13 +278,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/team-notes", async (req, res) => {
     try {
       const validatedData = insertTeamNotesSchema.parse(req.body);
-      const notes = await storage.saveTeamNotes(validatedData);
-      res.json(notes);
+      const note = await storage.addTeamNote(validatedData);
+      res.json(note);
     } catch (error: any) {
       console.error('Error in POST /api/team-notes:', error);
       if (error.name === 'ZodError') {
         return res.status(400).json({ error: "Invalid team notes data", details: error.errors });
       }
+      res.status(500).json({ error: error.message || "Internal server error" });
+    }
+  });
+
+  app.delete("/api/team-notes/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const success = await storage.deleteTeamNote(id);
+      if (success) {
+        res.json({ success: true });
+      } else {
+        res.status(404).json({ error: "Team note not found" });
+      }
+    } catch (error: any) {
+      console.error('Error in DELETE /api/team-notes:', error);
       res.status(500).json({ error: error.message || "Internal server error" });
     }
   });
