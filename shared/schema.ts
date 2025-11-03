@@ -42,6 +42,15 @@ export const attendance = pgTable("attendance", {
   date: text("date").notNull(),
   status: text("status").notNull(),
   notes: text("notes"),
+  ringer: text("ringer"),
+});
+
+export const teamNotes = pgTable("team_notes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  notes: text("notes"),
+  requirements: text("requirements"),
+  obstacles: text("obstacles"),
+  lastUpdated: text("last_updated").notNull(),
 });
 
 export const schedules = pgTable("schedules", {
@@ -87,6 +96,10 @@ export const insertAttendanceSchema = createInsertSchema(attendance).omit({
   id: true,
 });
 
+export const insertTeamNotesSchema = createInsertSchema(teamNotes).omit({
+  id: true,
+});
+
 export type AvailabilityOption = typeof availabilityOptions[number];
 export type RoleType = typeof roleTypes[number];
 export type DayOfWeek = typeof dayOfWeek[number];
@@ -107,6 +120,9 @@ export type InsertEvent = z.infer<typeof insertEventSchema>;
 
 export type Attendance = typeof attendance.$inferSelect;
 export type InsertAttendance = z.infer<typeof insertAttendanceSchema>;
+
+export type TeamNotes = typeof teamNotes.$inferSelect;
+export type InsertTeamNotes = z.infer<typeof insertTeamNotesSchema>;
 
 export interface PlayerAvailability {
   playerId: string;

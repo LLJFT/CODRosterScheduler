@@ -1,5 +1,5 @@
-import type { Player, InsertPlayer, Schedule, InsertSchedule, Setting, InsertSetting, Event, InsertEvent, Attendance, InsertAttendance } from "@shared/schema";
-import { players, schedules, settings, events, attendance } from "@shared/schema";
+import type { Player, InsertPlayer, Schedule, InsertSchedule, Setting, InsertSetting, Event, InsertEvent, Attendance, InsertAttendance, TeamNotes, InsertTeamNotes } from "@shared/schema";
+import { players, schedules, settings, events, attendance, teamNotes } from "@shared/schema";
 import { db } from "./db";
 import { eq, and } from "drizzle-orm";
 
@@ -22,6 +22,8 @@ export interface IStorage {
   addAttendance(attendance: InsertAttendance): Promise<Attendance>;
   updateAttendance(id: string, attendance: Partial<InsertAttendance>): Promise<Attendance>;
   removeAttendance(id: string): Promise<boolean>;
+  getTeamNotes(): Promise<TeamNotes | undefined>;
+  saveTeamNotes(notes: InsertTeamNotes): Promise<TeamNotes>;
 }
 
 export class DbStorage implements IStorage {
@@ -209,6 +211,32 @@ export class DbStorage implements IStorage {
       .returning();
 
     return deleted.length > 0;
+  }
+
+  async getTeamNotes(): Promise<TeamNotes | undefined> {
+    const result = await db.select().from(teamNotes).limit(1);
+    return result[0];
+  }
+
+  async saveTeamNotes(insertTeamNotes: InsertTeamNotes): Promise<TeamNotes> {
+    const existing = await this.getTeamNotes();
+
+    if (existing) {
+      const updated = await db
+        .update(teamNotes)
+        .set(insertTeamNotes)
+        .where(eq(teamNotes.id, existing.id))
+        .returning();
+
+      return updated[0];
+    }
+
+    const inserted = await db
+      .insert(teamNotes)
+      .values(insertTeamNotes)
+      .returning();
+
+    return inserted[0];
   }
 }
 
