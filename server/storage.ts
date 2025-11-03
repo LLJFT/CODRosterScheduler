@@ -1,5 +1,5 @@
-import type { Player, InsertPlayer, Schedule, InsertSchedule, Setting, InsertSetting, Event, InsertEvent } from "@shared/schema";
-import { players, schedules, settings, events } from "@shared/schema";
+import type { Player, InsertPlayer, Schedule, InsertSchedule, Setting, InsertSetting, Event, InsertEvent, Attendance, InsertAttendance } from "@shared/schema";
+import { players, schedules, settings, events, attendance } from "@shared/schema";
 import { db } from "./db";
 import { eq, and } from "drizzle-orm";
 
@@ -7,7 +7,9 @@ export interface IStorage {
   getSchedule(weekStartDate: string, weekEndDate: string): Promise<Schedule | undefined>;
   saveSchedule(schedule: InsertSchedule): Promise<Schedule>;
   getAllPlayers(): Promise<Player[]>;
+  getPlayer(id: string): Promise<Player | undefined>;
   addPlayer(player: InsertPlayer): Promise<Player>;
+  updatePlayer(id: string, player: Partial<InsertPlayer>): Promise<Player>;
   removePlayer(id: string): Promise<boolean>;
   getSetting(key: string): Promise<string | null>;
   setSetting(key: string, value: string): Promise<Setting>;
@@ -15,6 +17,11 @@ export interface IStorage {
   addEvent(event: InsertEvent): Promise<Event>;
   updateEvent(id: string, event: Partial<InsertEvent>): Promise<Event>;
   removeEvent(id: string): Promise<boolean>;
+  getAllAttendance(): Promise<Attendance[]>;
+  getAttendanceByPlayerId(playerId: string): Promise<Attendance[]>;
+  addAttendance(attendance: InsertAttendance): Promise<Attendance>;
+  updateAttendance(id: string, attendance: Partial<InsertAttendance>): Promise<Attendance>;
+  removeAttendance(id: string): Promise<boolean>;
 }
 
 export class DbStorage implements IStorage {
@@ -64,6 +71,16 @@ export class DbStorage implements IStorage {
     return await db.select().from(players);
   }
 
+  async getPlayer(id: string): Promise<Player | undefined> {
+    const result = await db
+      .select()
+      .from(players)
+      .where(eq(players.id, id))
+      .limit(1);
+
+    return result[0];
+  }
+
   async addPlayer(insertPlayer: InsertPlayer): Promise<Player> {
     const inserted = await db
       .insert(players)
@@ -71,6 +88,16 @@ export class DbStorage implements IStorage {
       .returning();
 
     return inserted[0];
+  }
+
+  async updatePlayer(id: string, updateData: Partial<InsertPlayer>): Promise<Player> {
+    const updated = await db
+      .update(players)
+      .set(updateData)
+      .where(eq(players.id, id))
+      .returning();
+
+    return updated[0];
   }
 
   async removePlayer(id: string): Promise<boolean> {
@@ -140,6 +167,45 @@ export class DbStorage implements IStorage {
     const deleted = await db
       .delete(events)
       .where(eq(events.id, id))
+      .returning();
+
+    return deleted.length > 0;
+  }
+
+  async getAllAttendance(): Promise<Attendance[]> {
+    return await db.select().from(attendance);
+  }
+
+  async getAttendanceByPlayerId(playerId: string): Promise<Attendance[]> {
+    return await db
+      .select()
+      .from(attendance)
+      .where(eq(attendance.playerId, playerId));
+  }
+
+  async addAttendance(insertAttendance: InsertAttendance): Promise<Attendance> {
+    const inserted = await db
+      .insert(attendance)
+      .values(insertAttendance)
+      .returning();
+
+    return inserted[0];
+  }
+
+  async updateAttendance(id: string, updateData: Partial<InsertAttendance>): Promise<Attendance> {
+    const updated = await db
+      .update(attendance)
+      .set(updateData)
+      .where(eq(attendance.id, id))
+      .returning();
+
+    return updated[0];
+  }
+
+  async removeAttendance(id: string): Promise<boolean> {
+    const deleted = await db
+      .delete(attendance)
+      .where(eq(attendance.id, id))
       .returning();
 
     return deleted.length > 0;

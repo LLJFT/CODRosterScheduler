@@ -25,10 +25,23 @@ export const dayOfWeek = [
 
 export const eventTypes = ["Tournament", "Scrim", "VOD Review"] as const;
 
+export const attendanceStatuses = ["attended", "late", "absent"] as const;
+
 export const players = pgTable("players", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
   role: text("role").notNull(),
+  fullName: text("full_name"),
+  phone: text("phone"),
+  snapchat: text("snapchat"),
+});
+
+export const attendance = pgTable("attendance", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  playerId: varchar("player_id").notNull().references(() => players.id),
+  date: text("date").notNull(),
+  status: text("status").notNull(),
+  notes: text("notes"),
 });
 
 export const schedules = pgTable("schedules", {
@@ -70,10 +83,15 @@ export const insertEventSchema = createInsertSchema(events).omit({
   id: true,
 });
 
+export const insertAttendanceSchema = createInsertSchema(attendance).omit({
+  id: true,
+});
+
 export type AvailabilityOption = typeof availabilityOptions[number];
 export type RoleType = typeof roleTypes[number];
 export type DayOfWeek = typeof dayOfWeek[number];
 export type EventType = typeof eventTypes[number];
+export type AttendanceStatus = typeof attendanceStatuses[number];
 
 export type Player = typeof players.$inferSelect;
 export type InsertPlayer = z.infer<typeof insertPlayerSchema>;
@@ -86,6 +104,9 @@ export type InsertSetting = z.infer<typeof insertSettingSchema>;
 
 export type Event = typeof events.$inferSelect;
 export type InsertEvent = z.infer<typeof insertEventSchema>;
+
+export type Attendance = typeof attendance.$inferSelect;
+export type InsertAttendance = z.infer<typeof insertAttendanceSchema>;
 
 export interface PlayerAvailability {
   playerId: string;

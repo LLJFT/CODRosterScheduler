@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertScheduleSchema, insertEventSchema } from "@shared/schema";
+import { insertScheduleSchema, insertEventSchema, insertPlayerSchema, insertAttendanceSchema } from "@shared/schema";
 import { 
   readScheduleFromSheet, 
   writeScheduleToSheet, 
@@ -163,6 +163,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error: any) {
       console.error('Error in DELETE /api/events:', error);
+      res.status(500).json({ error: error.message || "Internal server error" });
+    }
+  });
+
+  app.put("/api/players/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const validatedData = insertPlayerSchema.partial().parse(req.body);
+      const player = await storage.updatePlayer(id, validatedData);
+      res.json(player);
+    } catch (error: any) {
+      console.error('Error in PUT /api/players:', error);
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ error: "Invalid player data", details: error.errors });
+      }
+      res.status(500).json({ error: error.message || "Internal server error" });
+    }
+  });
+
+  app.get("/api/attendance", async (req, res) => {
+    try {
+      const attendance = await storage.getAllAttendance();
+      res.json(attendance);
+    } catch (error: any) {
+      console.error('Error in GET /api/attendance:', error);
+      res.status(500).json({ error: error.message || "Internal server error" });
+    }
+  });
+
+  app.post("/api/attendance", async (req, res) => {
+    try {
+      const validatedData = insertAttendanceSchema.parse(req.body);
+      const attendance = await storage.addAttendance(validatedData);
+      res.json(attendance);
+    } catch (error: any) {
+      console.error('Error in POST /api/attendance:', error);
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ error: "Invalid attendance data", details: error.errors });
+      }
+      res.status(500).json({ error: error.message || "Internal server error" });
+    }
+  });
+
+  app.put("/api/attendance/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const validatedData = insertAttendanceSchema.partial().parse(req.body);
+      const attendance = await storage.updateAttendance(id, validatedData);
+      res.json(attendance);
+    } catch (error: any) {
+      console.error('Error in PUT /api/attendance:', error);
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ error: "Invalid attendance data", details: error.errors });
+      }
+      res.status(500).json({ error: error.message || "Internal server error" });
+    }
+  });
+
+  app.delete("/api/attendance/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const success = await storage.removeAttendance(id);
+      if (success) {
+        res.json({ success: true });
+      } else {
+        res.status(404).json({ error: "Attendance not found" });
+      }
+    } catch (error: any) {
+      console.error('Error in DELETE /api/attendance:', error);
       res.status(500).json({ error: error.message || "Internal server error" });
     }
   });
