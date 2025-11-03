@@ -22,8 +22,9 @@ export interface IStorage {
   addAttendance(attendance: InsertAttendance): Promise<Attendance>;
   updateAttendance(id: string, attendance: Partial<InsertAttendance>): Promise<Attendance>;
   removeAttendance(id: string): Promise<boolean>;
-  getTeamNotes(): Promise<TeamNotes | undefined>;
-  saveTeamNotes(notes: InsertTeamNotes): Promise<TeamNotes>;
+  getTeamNotes(): Promise<TeamNotes[]>;
+  addTeamNote(note: InsertTeamNotes): Promise<TeamNotes>;
+  deleteTeamNote(id: string): Promise<boolean>;
 }
 
 export class DbStorage implements IStorage {
@@ -213,30 +214,26 @@ export class DbStorage implements IStorage {
     return deleted.length > 0;
   }
 
-  async getTeamNotes(): Promise<TeamNotes | undefined> {
-    const result = await db.select().from(teamNotes).limit(1);
-    return result[0];
+  async getTeamNotes(): Promise<TeamNotes[]> {
+    return await db.select().from(teamNotes).orderBy(teamNotes.timestamp);
   }
 
-  async saveTeamNotes(insertTeamNotes: InsertTeamNotes): Promise<TeamNotes> {
-    const existing = await this.getTeamNotes();
-
-    if (existing) {
-      const updated = await db
-        .update(teamNotes)
-        .set(insertTeamNotes)
-        .where(eq(teamNotes.id, existing.id))
-        .returning();
-
-      return updated[0];
-    }
-
+  async addTeamNote(insertTeamNote: InsertTeamNotes): Promise<TeamNotes> {
     const inserted = await db
       .insert(teamNotes)
-      .values(insertTeamNotes)
+      .values(insertTeamNote)
       .returning();
 
     return inserted[0];
+  }
+
+  async deleteTeamNote(id: string): Promise<boolean> {
+    const deleted = await db
+      .delete(teamNotes)
+      .where(eq(teamNotes.id, id))
+      .returning();
+
+    return deleted.length > 0;
   }
 }
 
