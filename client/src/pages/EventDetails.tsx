@@ -17,6 +17,8 @@ import { ArrowLeft, Plus, Trash2, Save, Upload, Eye } from "lucide-react";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
+import { ObjectUploader } from "@/components/ObjectUploader";
+import type { UploadResult } from "@uppy/core";
 
 export default function EventDetails() {
   const [, params] = useRoute("/events/:id");
@@ -33,8 +35,10 @@ export default function EventDetails() {
   const [newGameCode, setNewGameCode] = useState("");
   const [newGameScore, setNewGameScore] = useState("");
   const [newGameImageUrl, setNewGameImageUrl] = useState("");
+  const [uploadingImageForNewGame, setUploadingImageForNewGame] = useState(false);
 
   const [editingGame, setEditingGame] = useState<Game | null>(null);
+  const [uploadingImageForGame, setUploadingImageForGame] = useState<string | null>(null);
   const [viewingImage, setViewingImage] = useState<string | null>(null);
 
   const { data: event, isLoading: eventLoading } = useQuery<Event>({
@@ -144,6 +148,40 @@ export default function EventDetails() {
       setTimeout(() => setShowToast(false), 3000);
     },
   });
+
+  const handleGetUploadURL = async () => {
+    const response = await fetch("/api/objects/upload", { method: "POST" });
+    if (!response.ok) throw new Error("Failed to get upload URL");
+    const { uploadURL } = await response.json();
+    return { method: "PUT" as const, url: uploadURL };
+  };
+
+  const handleImageUploadComplete = (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
+    if (result.successful && result.successful.length > 0) {
+      const uploadURL = result.successful[0].uploadURL;
+      if (!uploadURL) return;
+      
+      const normalizedPath = uploadURL.split('?')[0].replace('https://storage.googleapis.com', '').replace(/^\/[^/]+\/\.private/, '/objects');
+      
+      if (uploadingImageForNewGame) {
+        setNewGameImageUrl(normalizedPath);
+        setUploadingImageForNewGame(false);
+        setToastMessage("Image uploaded successfully");
+        setToastType("success");
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 3000);
+      } else if (uploadingImageForGame) {
+        if (editingGame && editingGame.id === uploadingImageForGame) {
+          setEditingGame({ ...editingGame, imageUrl: normalizedPath });
+        }
+        setUploadingImageForGame(null);
+        setToastMessage("Image uploaded successfully");
+        setToastType("success");
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 3000);
+      }
+    }
+  };
 
   const handleSaveEventDetails = () => {
     updateEventMutation.mutate({
@@ -363,7 +401,7 @@ export default function EventDetails() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <label className="block text-sm font-medium">Add New Game</label>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 <Input
                   value={newGameCode}
                   onChange={(e) => setNewGameCode(e.target.value)}
@@ -376,19 +414,31 @@ export default function EventDetails() {
                   placeholder="Score (e.g., 2-1)"
                   data-testid="input-new-game-score"
                 />
-                <Input
-                  value={newGameImageUrl}
-                  onChange={(e) => setNewGameImageUrl(e.target.value)}
-                  placeholder="Image URL (optional)"
-                  data-testid="input-new-game-image"
-                />
+              </div>
+              <div className="flex gap-2 flex-wrap">
+                <ObjectUploader
+                  maxNumberOfFiles={1}
+                  maxFileSize={10485760}
+                  onGetUploadParameters={handleGetUploadURL}
+                  onComplete={handleImageUploadComplete}
+                  buttonVariant="outline"
+                  buttonSize="sm"
+                >
+                  <Upload className="h-4 w-4 mr-2" onClick={() => setUploadingImageForNewGame(true)} />
+                  {newGameImageUrl ? "Change Image" : "Upload Scoreboard"}
+                </ObjectUploader>
+                {newGameImageUrl && (
+                  <Badge variant="outline" className="text-xs">
+                    Image uploaded
+                  </Badge>
+                )}
                 <Button
                   onClick={handleAddGame}
                   disabled={addGameMutation.isPending}
                   data-testid="button-add-game"
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  Add
+                  Add Game
                 </Button>
               </div>
             </div>
@@ -439,14 +489,24 @@ export default function EventDetails() {
                         </td>
                         <td className="p-3">
                           {editingGame?.id === game.id ? (
-                            <Input
-                              value={editingGame.imageUrl || ""}
-                              onChange={(e) =>
-                                setEditingGame({ ...editingGame, imageUrl: e.target.value })
-                              }
-                              placeholder="Image URL"
-                              data-testid={`input-edit-image-${game.id}`}
-                            />
+                            <div className="flex gap-2 flex-wrap">
+                              <ObjectUploader
+                                maxNumberOfFiles={1}
+                                maxFileSize={10485760}
+                                onGetUploadParameters={handleGetUploadURL}
+                                onComplete={handleImageUploadComplete}
+                                buttonVariant="outline"
+                                buttonSize="sm"
+                              >
+                                <Upload className="h-4 w-4 mr-2" onClick={() => setUploadingImageForGame(game.id)} />
+                                {editingGame.imageUrl ? "Change" : "Upload"}
+                              </ObjectUploader>
+                              {editingGame.imageUrl && (
+                                <Badge variant="outline" className="text-xs">
+                                  Uploaded
+                                </Badge>
+                              )}
+                            </div>
                           ) : game.imageUrl ? (
                             <Button
                               size="sm"
