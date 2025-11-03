@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,8 +9,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Pencil, Trash2, ArrowLeft, Check, X, Clock, UserPlus, Users } from "lucide-react";
-import { format } from "date-fns";
+import { Plus, Pencil, Trash2, ArrowLeft, Check, X, Clock, UserPlus, Users, Send } from "lucide-react";
+import { format, formatDistanceToNow } from "date-fns";
 import type { Player, Attendance, AttendanceStatus, TeamNotes as TeamNotesType } from "@shared/schema";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useForm } from "react-hook-form";
@@ -34,16 +34,15 @@ const attendanceFormSchema = z.object({
   ringer: z.string().optional(),
 });
 
-const teamNotesFormSchema = z.object({
-  notes: z.string().optional(),
-  requirements: z.string().optional(),
-  obstacles: z.string().optional(),
-  lastUpdated: z.string(),
+const teamNoteFormSchema = z.object({
+  senderName: z.string().min(1, "Your name is required"),
+  message: z.string().min(1, "Message is required"),
+  timestamp: z.string(),
 });
 
 type PlayerFormData = z.infer<typeof playerFormSchema>;
 type AttendanceFormData = z.infer<typeof attendanceFormSchema>;
-type TeamNotesFormData = z.infer<typeof teamNotesFormSchema>;
+type TeamNoteFormData = z.infer<typeof teamNoteFormSchema>;
 
 export default function Players() {
   const [showPlayerDialog, setShowPlayerDialog] = useState(false);
@@ -65,7 +64,7 @@ export default function Players() {
     queryKey: ["/api/attendance"],
   });
 
-  const { data: teamNotes } = useQuery<TeamNotesType>({
+  const { data: teamNotes = [] } = useQuery<TeamNotesType[]>({
     queryKey: ["/api/team-notes"],
   });
 
@@ -91,26 +90,14 @@ export default function Players() {
     },
   });
 
-  const teamNotesForm = useForm<TeamNotesFormData>({
-    resolver: zodResolver(teamNotesFormSchema),
+  const teamNoteForm = useForm<TeamNoteFormData>({
+    resolver: zodResolver(teamNoteFormSchema),
     defaultValues: {
-      notes: "",
-      requirements: "",
-      obstacles: "",
-      lastUpdated: new Date().toISOString(),
+      senderName: "",
+      message: "",
+      timestamp: new Date().toISOString(),
     },
   });
-
-  useEffect(() => {
-    if (teamNotes) {
-      teamNotesForm.reset({
-        notes: teamNotes.notes || "",
-        requirements: teamNotes.requirements || "",
-        obstacles: teamNotes.obstacles || "",
-        lastUpdated: teamNotes.lastUpdated,
-      });
-    }
-  }, [teamNotes]);
 
   const createPlayerMutation = useMutation({
     mutationFn: async (data: PlayerFormData) => {
@@ -234,19 +221,42 @@ export default function Players() {
     },
   });
 
-  const saveTeamNotesMutation = useMutation({
-    mutationFn: async (data: TeamNotesFormData) => {
+  const addTeamNoteMutation = useMutation({
+    mutationFn: async (data: TeamNoteFormData) => {
       const response = await apiRequest("POST", "/api/team-notes", data);
       return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/team-notes"] });
-      setToastMessage("Team notes saved successfully");
+      teamNoteForm.reset({
+        senderName: "",
+        message: "",
+        timestamp: new Date().toISOString(),
+      });
+      setToastMessage("Team note sent successfully");
       setToastType("success");
       setShowToast(true);
     },
     onError: (error: any) => {
-      setToastMessage(error.message || "Failed to save team notes");
+      setToastMessage(error.message || "Failed to send team note");
+      setToastType("error");
+      setShowToast(true);
+    },
+  });
+
+  const deleteTeamNoteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await apiRequest("DELETE", `/api/team-notes/${id}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/team-notes"] });
+      setToastMessage("Team note deleted successfully");
+      setToastType("success");
+      setShowToast(true);
+    },
+    onError: (error: any) => {
+      setToastMessage(error.message || "Failed to delete team note");
       setToastType("error");
       setShowToast(true);
     },
@@ -324,10 +334,10 @@ export default function Players() {
     }
   };
 
-  const handleTeamNotesSubmit = (data: TeamNotesFormData) => {
-    saveTeamNotesMutation.mutate({
+  const handleTeamNoteSubmit = (data: TeamNoteFormData) => {
+    addTeamNoteMutation.mutate({
       ...data,
-      lastUpdated: new Date().toISOString(),
+      timestamp: new Date().toISOString(),
     });
   };
 
@@ -411,21 +421,20 @@ export default function Players() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Form {...teamNotesForm}>
-              <form onSubmit={teamNotesForm.handleSubmit(handleTeamNotesSubmit)} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Form {...teamNoteForm}>
+              <form onSubmit={teamNoteForm.handleSubmit(handleTeamNoteSubmit)} className="space-y-4 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
-                    control={teamNotesForm.control}
-                    name="notes"
+                    control={teamNoteForm.control}
+                    name="senderName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Notes</FormLabel>
+                        <FormLabel>Your Name *</FormLabel>
                         <FormControl>
-                          <Textarea
+                          <Input
                             {...field}
-                            placeholder="General team notes..."
-                            className="min-h-[100px]"
-                            data-testid="textarea-notes"
+                            placeholder="Enter your name"
+                            data-testid="input-sender-name"
                           />
                         </FormControl>
                         <FormMessage />
@@ -433,35 +442,17 @@ export default function Players() {
                     )}
                   />
                   <FormField
-                    control={teamNotesForm.control}
-                    name="requirements"
+                    control={teamNoteForm.control}
+                    name="message"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Requirements</FormLabel>
+                        <FormLabel>Message *</FormLabel>
                         <FormControl>
                           <Textarea
                             {...field}
-                            placeholder="Team requirements..."
-                            className="min-h-[100px]"
-                            data-testid="textarea-requirements"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={teamNotesForm.control}
-                    name="obstacles"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Obstacles</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            {...field}
-                            placeholder="Current obstacles..."
-                            className="min-h-[100px]"
-                            data-testid="textarea-obstacles"
+                            placeholder="Type your message..."
+                            className="min-h-[60px]"
+                            data-testid="textarea-message"
                           />
                         </FormControl>
                         <FormMessage />
@@ -469,11 +460,56 @@ export default function Players() {
                     )}
                   />
                 </div>
-                <Button type="submit" data-testid="button-save-notes">
-                  Save Team Notes
+                <Button type="submit" className="gap-2" data-testid="button-send-note">
+                  <Send className="h-4 w-4" />
+                  Send
                 </Button>
               </form>
             </Form>
+
+            {/* Team Notes Table */}
+            <div className="border border-border rounded-md overflow-hidden">
+              <table className="w-full">
+                <thead className="bg-primary/10">
+                  <tr>
+                    <th className="text-left p-3 font-semibold text-foreground">Sender</th>
+                    <th className="text-left p-3 font-semibold text-foreground">Message</th>
+                    <th className="text-left p-3 font-semibold text-foreground">Time</th>
+                    <th className="text-right p-3 font-semibold text-foreground">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {teamNotes.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} className="p-6 text-center text-muted-foreground">
+                        No team notes yet. Send the first message!
+                      </td>
+                    </tr>
+                  ) : (
+                    teamNotes.map((note) => (
+                      <tr key={note.id} className="border-t border-border hover-elevate">
+                        <td className="p-3 font-medium text-foreground">{note.senderName}</td>
+                        <td className="p-3 text-foreground whitespace-pre-wrap">{note.message}</td>
+                        <td className="p-3 text-muted-foreground text-sm">
+                          <div>{format(new Date(note.timestamp), "MMM dd, yyyy")}</div>
+                          <div className="text-xs">{format(new Date(note.timestamp), "hh:mm a")}</div>
+                        </td>
+                        <td className="p-3 text-right">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => deleteTeamNoteMutation.mutate(note.id)}
+                            data-testid={`button-delete-note-${note.id}`}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </CardContent>
         </Card>
 
