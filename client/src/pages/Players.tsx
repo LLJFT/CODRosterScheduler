@@ -23,7 +23,7 @@ const playerFormSchema = z.object({
   fullName: z.string().optional(),
   phone: z.string().optional(),
   snapchat: z.string().optional(),
-  role: z.enum(["Tank", "DPS", "Support"]),
+  role: z.enum(["Tank", "DPS", "Support", "Analyst", "Coach"]),
 });
 
 const attendanceFormSchema = z.object({
@@ -281,7 +281,7 @@ export default function Players() {
       fullName: player.fullName || "",
       phone: player.phone || "",
       snapchat: player.snapchat || "",
-      role: player.role as "Tank" | "DPS" | "Support",
+      role: player.role as "Tank" | "DPS" | "Support" | "Analyst" | "Coach",
     });
     setShowPlayerDialog(true);
   };
@@ -364,6 +364,8 @@ export default function Players() {
       Tank: "bg-blue-500",
       DPS: "bg-red-500",
       Support: "bg-green-500",
+      Analyst: "bg-purple-500",
+      Coach: "bg-yellow-500",
     };
     return (
       <Badge className={roleColors[role as keyof typeof roleColors] || "bg-gray-500"}>
@@ -734,6 +736,8 @@ export default function Players() {
                           <SelectItem value="Tank">Tank</SelectItem>
                           <SelectItem value="DPS">DPS</SelectItem>
                           <SelectItem value="Support">Support</SelectItem>
+                          <SelectItem value="Analyst">Analyst</SelectItem>
+                          <SelectItem value="Coach">Coach</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />

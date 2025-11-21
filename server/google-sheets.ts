@@ -449,11 +449,13 @@ export function convertScheduleToSheetData(scheduleData: any, weekStart: string,
   const headerRow = ['Role', 'Players', ...days];
   
   // Group players by role and sort them
-  const roleOrder = ['Tank', 'DPS', 'Support'];
+  const roleOrder = ["Tank", "DPS", "Support", "Analyst", "Coach"];
   const playersByRole: Record<string, any[]> = {
     Tank: [],
     DPS: [],
     Support: [],
+    Analyst: [],
+    Coach: [],
   };
   
   // Group players by their role

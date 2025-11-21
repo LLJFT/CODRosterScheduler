@@ -91,7 +91,7 @@ export function ScheduleTable({ scheduleData, onAvailabilityChange, onRoleChange
     return acc;
   }, {} as Record<string, PlayerAvailability[]>);
 
-  const roleOrder = ["Tank", "DPS", "Support"];
+  const roleOrder = ["Tank", "DPS", "Support", "Analyst", "Coach"];
 
   return (
     <div className="w-full overflow-hidden rounded-lg border border-border bg-card" ref={tableRef}>
