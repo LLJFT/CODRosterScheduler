@@ -30,12 +30,13 @@ interface PlayerManagerProps {
   onEditPlayer: (playerId: string, name: string, role: RoleType) => void;
 }
 
+/** نفس ألوان الرولات المستخدمة في ScheduleTable.tsx */
 const roleColors: Record<string, string> = {
-  AR: "bg-slate-800 text-white",
-  SUB: "bg-orange-500 text-white",
-  FLEX: "bg-emerald-500 text-white",
-  MANAGER: "bg-purple-500 text-white",
-  COACH: "bg-yellow-500 text-black",
+  AR: "bg-blue-600 text-white border-blue-500",
+  SUB: "bg-emerald-600 text-white border-emerald-500",
+  FLEX: "bg-purple-600 text-white border-purple-500",
+  MANAGER: "bg-slate-600 text-white border-slate-500",
+  COACH: "bg-amber-400 text-black border-amber-300",
 };
 
 const roleDisplayNames: Record<RoleType, string> = {
@@ -46,24 +47,32 @@ const roleDisplayNames: Record<RoleType, string> = {
   COACH: "Coach",
 };
 
-export function PlayerManager({ players, onAddPlayer, onRemovePlayer, onEditPlayer }: PlayerManagerProps) {
+export function PlayerManager({
+  players,
+  onAddPlayer,
+  onRemovePlayer,
+  onEditPlayer,
+}: PlayerManagerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [newPlayerName, setNewPlayerName] = useState("");
   const [newPlayerRole, setNewPlayerRole] = useState<RoleType>("AR");
-  const [editingPlayer, setEditingPlayer] = useState<PlayerAvailability | null>(null);
+  const [editingPlayer, setEditingPlayer] = useState<PlayerAvailability | null>(
+    null
+  );
 
-  const handleAddPlayer = () => {
-    if (newPlayerName.trim()) {
-      if (editingPlayer) {
-        onEditPlayer(editingPlayer.playerId, newPlayerName.trim(), newPlayerRole);
-        setEditingPlayer(null);
-      } else {
-        onAddPlayer(newPlayerName.trim(), newPlayerRole);
-      }
-      setNewPlayerName("");
-      setNewPlayerRole("AR");
-      setIsOpen(false);
+  const handleAddOrUpdate = () => {
+    if (!newPlayerName.trim()) return;
+
+    if (editingPlayer) {
+      onEditPlayer(editingPlayer.playerId, newPlayerName.trim(), newPlayerRole);
+    } else {
+      onAddPlayer(newPlayerName.trim(), newPlayerRole);
     }
+
+    setNewPlayerName("");
+    setNewPlayerRole("AR");
+    setEditingPlayer(null);
+    setIsOpen(false);
   };
 
   const handleEditClick = (player: PlayerAvailability) => {
@@ -73,7 +82,7 @@ export function PlayerManager({ players, onAddPlayer, onRemovePlayer, onEditPlay
     setIsOpen(true);
   };
 
-  const handleDialogClose = (open: boolean) => {
+  const handleDialogChange = (open: boolean) => {
     setIsOpen(open);
     if (!open) {
       setEditingPlayer(null);
@@ -83,22 +92,32 @@ export function PlayerManager({ players, onAddPlayer, onRemovePlayer, onEditPlay
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleDialogClose}>
+    <Dialog open={isOpen} onOpenChange={handleDialogChange}>
       <DialogTrigger asChild>
-        <Button variant="default" className="gap-2" data-testid="button-add-player">
+        <Button
+          variant="default"
+          className="gap-2"
+          data-testid="button-add-player"
+        >
           <Plus className="h-4 w-4" />
           Manage Players
         </Button>
       </DialogTrigger>
+
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>{editingPlayer ? "Edit Player" : "Manage Players"}</DialogTitle>
+          <DialogTitle>
+            {editingPlayer ? "Edit Player" : "Manage Players"}
+          </DialogTitle>
           <DialogDescription>
-            {editingPlayer ? "Edit player information" : "Add new players or remove existing ones"}
+            {editingPlayer
+              ? "Edit player name and role."
+              : "Add new players or remove existing ones."}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
+          {/* Form */}
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="player-name">Player Name</Label>
@@ -107,16 +126,18 @@ export function PlayerManager({ players, onAddPlayer, onRemovePlayer, onEditPlay
                 placeholder="Enter player name"
                 value={newPlayerName}
                 onChange={(e) => setNewPlayerName(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleAddPlayer()}
-                data-testid="input-player-name"
+                onKeyDown={(e) => e.key === "Enter" && handleAddOrUpdate()}
               />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="player-role">Role</Label>
-              <Select value={newPlayerRole} onValueChange={(v) => setNewPlayerRole(v as RoleType)}>
-                <SelectTrigger id="player-role" data-testid="select-player-role">
-                  <SelectValue />
+              <Select
+                value={newPlayerRole}
+                onValueChange={(value) => setNewPlayerRole(value as RoleType)}
+              >
+                <SelectTrigger id="player-role">
+                  <SelectValue placeholder="Select role" />
                 </SelectTrigger>
                 <SelectContent>
                   {roleTypes.map((role) => (
@@ -129,10 +150,9 @@ export function PlayerManager({ players, onAddPlayer, onRemovePlayer, onEditPlay
             </div>
 
             <Button
-              onClick={handleAddPlayer}
+              onClick={handleAddOrUpdate}
               disabled={!newPlayerName.trim()}
               className="w-full"
-              data-testid="button-confirm-add-player"
             >
               {editingPlayer ? (
                 <>
@@ -148,6 +168,7 @@ export function PlayerManager({ players, onAddPlayer, onRemovePlayer, onEditPlay
             </Button>
           </div>
 
+          {/* Players list */}
           {!editingPlayer && players.length > 0 && (
             <div className="space-y-2">
               <Label>Current Players</Label>
@@ -158,10 +179,15 @@ export function PlayerManager({ players, onAddPlayer, onRemovePlayer, onEditPlay
                     className="flex items-center justify-between p-2 rounded-md hover-elevate border border-border"
                   >
                     <div className="flex items-center gap-3">
-                      <Badge variant="secondary" className={`${roleColors[player.role]} text-xs`}>
+                      <Badge
+                        variant="secondary"
+                        className={`text-xs border ${roleColors[player.role]}`}
+                      >
                         {roleDisplayNames[player.role]}
                       </Badge>
-                      <span className="text-sm font-medium">{player.playerName}</span>
+                      <span className="text-sm font-medium">
+                        {player.playerName}
+                      </span>
                     </div>
                     <div className="flex items-center gap-1">
                       <Button

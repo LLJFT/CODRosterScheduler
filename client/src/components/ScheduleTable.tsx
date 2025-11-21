@@ -7,23 +7,33 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import type { PlayerAvailability, DayOfWeek, AvailabilityOption, RoleType } from "@shared/schema";
+import type {
+  PlayerAvailability,
+  DayOfWeek,
+  AvailabilityOption,
+  RoleType,
+} from "@shared/schema";
 import { dayOfWeek, availabilityOptions } from "@shared/schema";
 
 interface ScheduleTableProps {
   scheduleData: PlayerAvailability[];
-  onAvailabilityChange: (playerId: string, day: DayOfWeek, availability: AvailabilityOption) => void;
+  onAvailabilityChange: (
+    playerId: string,
+    day: DayOfWeek,
+    availability: AvailabilityOption
+  ) => void;
   onRoleChange?: (playerId: string, role: RoleType) => void;
   onPlayerNameChange?: (playerId: string, name: string) => void;
   isLoading?: boolean;
 }
 
+/** ألوان الرولات – COD */
 const roleColors: Record<string, string> = {
-  AR: "bg-slate-800 text-white",
-  SUB: "bg-orange-500 text-white",
-  FLEX: "bg-emerald-500 text-white",
-  MANAGER: "bg-purple-500 text-white",
-  COACH: "bg-yellow-500 text-black",
+  AR: "bg-blue-600 text-white border-blue-500",
+  SUB: "bg-emerald-600 text-white border-emerald-500",
+  FLEX: "bg-purple-600 text-white border-purple-500",
+  MANAGER: "bg-slate-600 text-white border-slate-500",
+  COACH: "bg-amber-400 text-black border-amber-300",
 };
 
 const roleDisplayNames: Record<string, string> = {
@@ -34,12 +44,17 @@ const roleDisplayNames: Record<string, string> = {
   COACH: "Coach",
 };
 
+/** ألوان حالات التوفر */
 const availabilityColors: Record<AvailabilityOption, string> = {
   unknown: "bg-muted text-muted-foreground",
-  "18:00-20:00 CEST": "bg-primary/10 text-primary dark:bg-primary/20",
-  "20:00-22:00 CEST": "bg-primary/10 text-primary dark:bg-primary/20",
-  "All blocks": "bg-green-500/10 text-green-700 dark:bg-green-500/20 dark:text-green-300",
-  cannot: "bg-destructive/10 text-destructive dark:bg-destructive/20",
+  "18:00-20:00 CEST":
+    "bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary",
+  "20:00-22:00 CEST":
+    "bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary",
+  "All blocks":
+    "bg-emerald-500/10 text-emerald-400 dark:bg-emerald-500/20 dark:text-emerald-300",
+  cannot:
+    "bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive",
 };
 
 const availabilityDisplayText: Record<AvailabilityOption, string> = {
@@ -98,21 +113,24 @@ export function ScheduleTable({
   const roleOrder = ["AR", "SUB", "FLEX", "MANAGER", "COACH"];
 
   return (
-    <div className="w-full overflow-hidden rounded-lg border border-border bg-card" ref={tableRef}>
+    <div
+      className="w-full overflow-hidden rounded-lg border border-border bg-card"
+      ref={tableRef}
+    >
       <div className="overflow-x-auto">
         <table className="w-full border-collapse">
           <thead>
             <tr className="bg-primary text-primary-foreground">
-              <th className="border-r border-primary-border px-4 py-3 text-left text-sm font-semibold uppercase tracking-wide">
+              <th className="border-r border-border/50 px-4 py-3 text-left text-sm font-semibold uppercase tracking-wide">
                 Role
               </th>
-              <th className="border-r border-primary-border px-4 py-3 text-left text-sm font-semibold uppercase tracking-wide min-w-[140px]">
+              <th className="border-r border-border/50 px-4 py-3 text-left text-sm font-semibold uppercase tracking-wide min-w-[140px]">
                 Player
               </th>
               {dayOfWeek.map((day) => (
                 <th
                   key={day}
-                  className="border-r border-primary-border px-3 py-3 text-center text-sm font-semibold uppercase tracking-wide min-w-[160px] last:border-r-0"
+                  className="border-r border-border/50 px-3 py-3 text-center text-sm font-semibold uppercase tracking-wide min-w-[160px] last:border-r-0"
                 >
                   {day}
                 </th>
@@ -125,7 +143,11 @@ export function ScheduleTable({
               if (playersInRole.length === 0) return null;
 
               return playersInRole.map((player) => (
-                <tr key={player.playerId} className="border-t border-border hover-elevate">
+                <tr
+                  key={player.playerId}
+                  className="border-t border-border hover-elevate"
+                >
+                  {/* ROLE */}
                   <td className="border-r border-border px-2 py-2 bg-card">
                     <Select
                       value={player.role}
@@ -134,8 +156,12 @@ export function ScheduleTable({
                       }}
                       disabled={isLoading}
                     >
-                      <SelectTrigger className={`w-full h-9 text-xs font-medium ${roleColors[role]} border-0`}>
-                        <SelectValue>{roleDisplayNames[player.role]}</SelectValue>
+                      <SelectTrigger
+                        className={`w-full h-9 text-xs font-medium border ${roleColors[role]} focus:ring-1 focus:ring-ring`}
+                      >
+                        <SelectValue>
+                          {roleDisplayNames[player.role] || player.role}
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="AR">AR</SelectItem>
@@ -147,6 +173,7 @@ export function ScheduleTable({
                     </Select>
                   </td>
 
+                  {/* PLAYER NAME */}
                   <td className="border-r border-border px-2 py-2 bg-card">
                     {editingName === player.playerId ? (
                       <Input
@@ -162,30 +189,38 @@ export function ScheduleTable({
                       />
                     ) : (
                       <div
-                        onClick={() => handleNameEdit(player.playerId, player.playerName)}
-                        className="text-sm font-medium text-card-foreground cursor-pointer hover:bg-accent/50 px-2 py-1 rounded-md"
+                        onClick={() =>
+                          handleNameEdit(player.playerId, player.playerName)
+                        }
+                        className="text-sm font-medium text-card-foreground cursor-pointer hover:bg-accent/40 px-2 py-1 rounded-md"
                       >
                         {player.playerName}
                       </div>
                     )}
                   </td>
 
+                  {/* AVAILABILITY CELLS */}
                   {dayOfWeek.map((day) => {
                     const availability = player.availability[day];
                     const dropdownKey = `${player.playerId}-${day}`;
 
                     return (
-                      <td key={day} className="border-r border-border px-2 py-2 bg-card last:border-r-0">
+                      <td
+                        key={day}
+                        className="border-r border-border px-2 py-2 bg-card last:border-r-0"
+                      >
                         <Select
                           value={availability}
                           onValueChange={(value: AvailabilityOption) =>
                             onAvailabilityChange(player.playerId, day, value)
                           }
                           disabled={isLoading}
-                          onOpenChange={(open) => handleOpenChange(dropdownKey, open)}
+                          onOpenChange={(open) =>
+                            handleOpenChange(dropdownKey, open)
+                          }
                         >
                           <SelectTrigger
-                            className={`w-full h-9 text-xs font-medium ${availabilityColors[availability]} border-0`}
+                            className={`w-full h-9 text-xs font-medium border ${availabilityColors[availability]} focus:ring-1 focus:ring-ring`}
                           >
                             <SelectValue>
                               <span className="block truncate">
@@ -213,7 +248,9 @@ export function ScheduleTable({
 
       {scheduleData.length === 0 && (
         <div className="py-12 text-center">
-          <p className="text-muted-foreground text-sm">No players in the schedule</p>
+          <p className="text-muted-foreground text-sm">
+            No players in the schedule
+          </p>
         </div>
       )}
     </div>
