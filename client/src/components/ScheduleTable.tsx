@@ -23,12 +23,16 @@ const roleColors: Record<string, string> = {
   Tank: "bg-blue-500/10 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 border-blue-500/20",
   DPS: "bg-red-500/10 text-red-700 dark:bg-red-500/20 dark:text-red-300 border-red-500/20",
   Support: "bg-green-500/10 text-green-700 dark:bg-green-500/20 dark:text-green-300 border-green-500/20",
+  Analyst: "bg-purple-500/10 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300 border-purple-500/20",
+  Coach: "bg-yellow-500/10 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-300 border-yellow-500/20",
 };
 
 const roleDisplayNames: Record<string, string> = {
   Tank: "Tank",
   DPS: "DPS",
   Support: "Support",
+  Analyst: "Analyst",
+  Coach: "Coach",
 };
 
 const availabilityColors: Record<AvailabilityOption, string> = {
@@ -109,7 +113,6 @@ export function ScheduleTable({ scheduleData, onAvailabilityChange, onRoleChange
                 <th
                   key={day}
                   className="border-r border-primary-border px-3 py-3 text-center text-sm font-semibold uppercase tracking-wide min-w-[160px] last:border-r-0"
-                  data-testid={`header-${day.toLowerCase()}`}
                 >
                   {day}
                 </th>
@@ -121,11 +124,10 @@ export function ScheduleTable({ scheduleData, onAvailabilityChange, onRoleChange
               const playersInRole = groupedByRole[role] || [];
               if (playersInRole.length === 0) return null;
 
-              return playersInRole.map((player, index) => (
+              return playersInRole.map((player) => (
                 <tr
                   key={player.playerId}
                   className="border-t border-border hover-elevate"
-                  data-testid={`row-player-${player.playerId}`}
                 >
                   <td className="border-r border-border px-2 py-2 bg-card">
                     <Select
@@ -138,20 +140,23 @@ export function ScheduleTable({ scheduleData, onAvailabilityChange, onRoleChange
                       disabled={isLoading}
                     >
                       <SelectTrigger
-                        className={`w-full h-9 text-xs font-medium ${roleColors[role]} border-0 focus:ring-1 focus:ring-ring`}
-                        data-testid={`select-role-${player.playerId}`}
+                        className={`w-full h-9 text-xs font-medium ${roleColors[role]} border-0`}
                       >
                         <SelectValue>
                           {roleDisplayNames[player.role]}
                         </SelectValue>
                       </SelectTrigger>
+
                       <SelectContent>
-                        <SelectItem value="Tank" className="text-sm">Tank</SelectItem>
-                        <SelectItem value="DPS" className="text-sm">DPS</SelectItem>
-                        <SelectItem value="Support" className="text-sm">Support</SelectItem>
+                        <SelectItem value="Tank">Tank</SelectItem>
+                        <SelectItem value="DPS">DPS</SelectItem>
+                        <SelectItem value="Support">Support</SelectItem>
+                        <SelectItem value="Analyst">Analyst</SelectItem>
+                        <SelectItem value="Coach">Coach</SelectItem>
                       </SelectContent>
                     </Select>
                   </td>
+
                   <td className="border-r border-border px-2 py-2 bg-card">
                     {editingName === player.playerId ? (
                       <Input
@@ -159,36 +164,27 @@ export function ScheduleTable({ scheduleData, onAvailabilityChange, onRoleChange
                         onChange={(e) => setEditedName(e.target.value)}
                         onBlur={() => handleNameSave(player.playerId)}
                         onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            handleNameSave(player.playerId);
-                          } else if (e.key === 'Escape') {
-                            handleNameCancel();
-                          }
+                          if (e.key === "Enter") handleNameSave(player.playerId);
+                          if (e.key === "Escape") handleNameCancel();
                         }}
-                        className="h-8 text-sm"
                         autoFocus
-                        data-testid={`input-edit-player-name-${player.playerId}`}
                       />
                     ) : (
                       <div
                         onClick={() => handleNameEdit(player.playerId, player.playerName)}
-                        className="text-sm font-medium text-card-foreground cursor-pointer hover:bg-accent/50 px-2 py-1 rounded-md"
-                        data-testid={`text-player-name-${player.playerId}`}
+                        className="cursor-pointer px-2 py-1 rounded-md hover:bg-accent/50"
                       >
                         {player.playerName}
                       </div>
                     )}
                   </td>
+
                   {dayOfWeek.map((day) => {
                     const availability = player.availability[day];
                     const dropdownKey = `${player.playerId}-${day}`;
-                    const isOpen = openDropdowns.has(dropdownKey);
 
                     return (
-                      <td
-                        key={day}
-                        className="border-r border-border px-2 py-2 bg-card last:border-r-0"
-                      >
+                      <td key={day} className="border-r border-border px-2 py-2 bg-card">
                         <Select
                           value={availability}
                           onValueChange={(value: AvailabilityOption) =>
@@ -198,23 +194,18 @@ export function ScheduleTable({ scheduleData, onAvailabilityChange, onRoleChange
                           onOpenChange={(open) => handleOpenChange(dropdownKey, open)}
                         >
                           <SelectTrigger
-                            className={`w-full h-9 text-xs font-medium ${availabilityColors[availability]} border-0 focus:ring-1 focus:ring-ring`}
-                            data-testid={`select-availability-${player.playerId}-${day.toLowerCase()}`}
+                            className={`w-full h-9 text-xs font-medium ${availabilityColors[availability]} border-0`}
                           >
                             <SelectValue>
-                              <span className="block truncate">
+                              <span className="truncate">
                                 {availabilityDisplayText[availability]}
                               </span>
                             </SelectValue>
                           </SelectTrigger>
+
                           <SelectContent>
                             {availabilityOptions.map((option) => (
-                              <SelectItem
-                                key={option}
-                                value={option}
-                                className="text-sm"
-                                data-testid={`option-${option}`}
-                              >
+                              <SelectItem key={option} value={option}>
                                 {availabilityDisplayText[option]}
                               </SelectItem>
                             ))}
@@ -229,9 +220,10 @@ export function ScheduleTable({ scheduleData, onAvailabilityChange, onRoleChange
           </tbody>
         </table>
       </div>
+
       {scheduleData.length === 0 && (
-        <div className="py-12 text-center">
-          <p className="text-muted-foreground text-sm">No players in the schedule</p>
+        <div className="py-12 text-center text-muted-foreground">
+          No players in the schedule
         </div>
       )}
     </div>
