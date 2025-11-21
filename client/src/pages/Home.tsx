@@ -74,7 +74,6 @@ export default function Home() {
     },
   });
 
-
   const handleAvailabilityChange = (playerId: string, day: DayOfWeek, availability: AvailabilityOption) => {
     setScheduleData((prev) =>
       prev.map((player) =>
@@ -136,7 +135,7 @@ export default function Home() {
     if (player) {
       const confirm = window.confirm(`Remove ${player.playerName}?`);
       if (!confirm) return;
-      
+
       setScheduleData((prev) => prev.filter((p) => p.playerId !== playerId));
       setHasChanges(true);
       setToastMessage(`Removed ${player.playerName} from schedule`);
@@ -161,19 +160,19 @@ export default function Home() {
 
   const handleShare = async () => {
     try {
-      const response = await fetch('/api/spreadsheet-info');
+      const response = await fetch("/api/spreadsheet-info");
       const data = await response.json();
-      
+
       if (!response.ok || !data.url) {
-        throw new Error('Failed to get spreadsheet URL');
+        throw new Error("Failed to get spreadsheet URL");
       }
-      
+
       await navigator.clipboard.writeText(data.url);
       setToastMessage("Google Sheets link copied");
       setToastType("success");
       setShowToast(true);
     } catch (error) {
-      console.error('Share error:', error);
+      console.error("Share error:", error);
       setToastMessage("Failed to copy link");
       setToastType("error");
       setShowToast(true);
@@ -191,10 +190,10 @@ export default function Home() {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4 border-b border-border">
             <div>
               <h1 className="text-3xl font-bold text-foreground mb-1" data-testid="text-page-title">
-                Marvel Rivals
+                Call of duty general’s roster
               </h1>
               <p className="text-lg font-semibold text-primary" data-testid="text-week-range">
-                The Vicious Availability Times ({currentDate})
+                General’s roster availability time ({currentDate})
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -208,7 +207,6 @@ export default function Home() {
           </div>
 
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-
             <div className="flex items-center gap-2 flex-wrap">
               <PlayerManager
                 players={scheduleData}
