@@ -60,7 +60,7 @@ async function getOrCreateSpreadsheet(): Promise<string> {
   const spreadsheet = await sheets.spreadsheets.create({
     requestBody: {
       properties: {
-        title: 'Marvel Rivals Team Schedule',
+        title: 'Call of Duty Team Schedule',
       },
     },
   });

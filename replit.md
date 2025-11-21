@@ -1,8 +1,8 @@
-# Marvel Rivals Roster Attendance Manager
+# Call of Duty Roster Attendance Manager
 
 ## Overview
 
-This application serves as a permanent team availability tracker for "The Vicious" Marvel Rivals esports team. Its core purpose is to enable team managers to track player availability for practice sessions across Tank, DPS, and Support roles. Key features include a persistent Monday-Sunday schedule, real-time synchronization with Google Sheets, inline editing, a dedicated events calendar for tournaments and scrims with comprehensive event details tracking, enhanced player management with personal information and attendance tracking, and a team notes messaging system. The design follows a Material Design aesthetic with a golden and black theme, aligning with Marvel Rivals branding. The project aims to provide a robust, year-round solution for esports team management.
+This application serves as a permanent team availability tracker for "The Vicious" Call of Duty esports team. Its core purpose is to enable team managers to track player availability for practice sessions across Tank, DPS, and Support roles. Key features include a persistent Monday-Sunday schedule, real-time synchronization with Google Sheets, inline editing, a dedicated events calendar for tournaments and scrims with comprehensive event details tracking, enhanced player management with personal information and attendance tracking, and a team notes messaging system. The design follows a Material Design aesthetic with a golden and black theme, aligning with Call of Duty branding. The project aims to provide a robust, year-round solution for esports team management.
 
 ## User Preferences
 

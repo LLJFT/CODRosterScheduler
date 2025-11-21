@@ -1,4 +1,4 @@
-# Design Guidelines: Marvel Rivals Roster Attendance Manager
+# Design Guidelines: Call of Duty Roster Attendance Manager
 
 ## Design Approach
 **Selected Approach:** Design System - Material Design  
@@ -54,7 +54,7 @@
 - Density: Comfortable spacing (py-3 px-4 per cell)
 
 ### Header Section
-- Large title showing "Marvel Rivals - Team Schedule"
+- Large title showing "Call of Duty - Team Schedule"
 - Editable week range display (e.g., "22.09 - 28.09")
 - Action buttons group: "Edit Dates", "Save to Sheets", "Export/Share"
 - Optional: Quick stats (e.g., "5/8 responses received")
