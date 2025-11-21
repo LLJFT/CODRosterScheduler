@@ -31,25 +31,25 @@ interface PlayerManagerProps {
 }
 
 const roleColors: Record<string, string> = {
-  Tank: "bg-blue-500/10 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 border-blue-500/20",
-  DPS: "bg-red-500/10 text-red-700 dark:bg-red-500/20 dark:text-red-300 border-red-500/20",
-  Support: "bg-green-500/10 text-green-700 dark:bg-green-500/20 dark:text-green-300 border-green-500/20",
-  Analyst: "bg-purple-500/10 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300 border-purple-500/20",
-  Coach: "bg-yellow-500/10 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-300 border-yellow-500/20",
+  AR: "bg-slate-800 text-white",
+  SUB: "bg-orange-500 text-white",
+  FLEX: "bg-emerald-500 text-white",
+  MANAGER: "bg-purple-500 text-white",
+  COACH: "bg-yellow-500 text-black",
 };
 
 const roleDisplayNames: Record<RoleType, string> = {
-  Tank: "Tank",
-  DPS: "DPS",
-  Support: "Support",
-  Analyst: "Analyst",
-  Coach: "Coach",
+  AR: "AR",
+  SUB: "SUB",
+  FLEX: "FLEX",
+  MANAGER: "Manager",
+  COACH: "Coach",
 };
 
 export function PlayerManager({ players, onAddPlayer, onRemovePlayer, onEditPlayer }: PlayerManagerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [newPlayerName, setNewPlayerName] = useState("");
-  const [newPlayerRole, setNewPlayerRole] = useState<RoleType>("Tank");
+  const [newPlayerRole, setNewPlayerRole] = useState<RoleType>("AR");
   const [editingPlayer, setEditingPlayer] = useState<PlayerAvailability | null>(null);
 
   const handleAddPlayer = () => {
@@ -61,7 +61,7 @@ export function PlayerManager({ players, onAddPlayer, onRemovePlayer, onEditPlay
         onAddPlayer(newPlayerName.trim(), newPlayerRole);
       }
       setNewPlayerName("");
-      setNewPlayerRole("Tank");
+      setNewPlayerRole("AR");
       setIsOpen(false);
     }
   };
@@ -78,7 +78,7 @@ export function PlayerManager({ players, onAddPlayer, onRemovePlayer, onEditPlay
     if (!open) {
       setEditingPlayer(null);
       setNewPlayerName("");
-      setNewPlayerRole("Tank");
+      setNewPlayerRole("AR");
     }
   };
 
@@ -92,9 +92,9 @@ export function PlayerManager({ players, onAddPlayer, onRemovePlayer, onEditPlay
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>{editingPlayer ? 'Edit Player' : 'Manage Players'}</DialogTitle>
+          <DialogTitle>{editingPlayer ? "Edit Player" : "Manage Players"}</DialogTitle>
           <DialogDescription>
-            {editingPlayer ? 'Edit player information' : 'Add new players or remove existing ones'}
+            {editingPlayer ? "Edit player information" : "Add new players or remove existing ones"}
           </DialogDescription>
         </DialogHeader>
 
@@ -156,7 +156,6 @@ export function PlayerManager({ players, onAddPlayer, onRemovePlayer, onEditPlay
                   <div
                     key={player.playerId}
                     className="flex items-center justify-between p-2 rounded-md hover-elevate border border-border"
-                    data-testid={`player-item-${player.playerId}`}
                   >
                     <div className="flex items-center gap-3">
                       <Badge variant="secondary" className={`${roleColors[player.role]} text-xs`}>
@@ -170,7 +169,6 @@ export function PlayerManager({ players, onAddPlayer, onRemovePlayer, onEditPlay
                         size="icon"
                         onClick={() => handleEditClick(player)}
                         className="h-8 w-8"
-                        data-testid={`button-edit-player-${player.playerId}`}
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
@@ -179,7 +177,6 @@ export function PlayerManager({ players, onAddPlayer, onRemovePlayer, onEditPlay
                         size="icon"
                         onClick={() => onRemovePlayer(player.playerId)}
                         className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                        data-testid={`button-remove-player-${player.playerId}`}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -192,7 +189,7 @@ export function PlayerManager({ players, onAddPlayer, onRemovePlayer, onEditPlay
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => setIsOpen(false)} data-testid="button-close-dialog">
+          <Button variant="outline" onClick={() => setIsOpen(false)}>
             Close
           </Button>
         </DialogFooter>

@@ -6,7 +6,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import type { PlayerAvailability, DayOfWeek, AvailabilityOption, RoleType } from "@shared/schema";
 import { dayOfWeek, availabilityOptions } from "@shared/schema";
@@ -20,51 +19,54 @@ interface ScheduleTableProps {
 }
 
 const roleColors: Record<string, string> = {
-  Tank: "bg-blue-500/10 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 border-blue-500/20",
-  DPS: "bg-red-500/10 text-red-700 dark:bg-red-500/20 dark:text-red-300 border-red-500/20",
-  Support: "bg-green-500/10 text-green-700 dark:bg-green-500/20 dark:text-green-300 border-green-500/20",
-  Analyst: "bg-purple-500/10 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300 border-purple-500/20",
-  Coach: "bg-yellow-500/10 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-300 border-yellow-500/20",
+  AR: "bg-slate-800 text-white",
+  SUB: "bg-orange-500 text-white",
+  FLEX: "bg-emerald-500 text-white",
+  MANAGER: "bg-purple-500 text-white",
+  COACH: "bg-yellow-500 text-black",
 };
 
 const roleDisplayNames: Record<string, string> = {
-  Tank: "Tank",
-  DPS: "DPS",
-  Support: "Support",
-  Analyst: "Analyst",
-  Coach: "Coach",
+  AR: "AR",
+  SUB: "SUB",
+  FLEX: "FLEX",
+  MANAGER: "Manager",
+  COACH: "Coach",
 };
 
 const availabilityColors: Record<AvailabilityOption, string> = {
-  "unknown": "bg-muted text-muted-foreground",
+  unknown: "bg-muted text-muted-foreground",
   "18:00-20:00 CEST": "bg-primary/10 text-primary dark:bg-primary/20",
   "20:00-22:00 CEST": "bg-primary/10 text-primary dark:bg-primary/20",
   "All blocks": "bg-green-500/10 text-green-700 dark:bg-green-500/20 dark:text-green-300",
-  "cannot": "bg-destructive/10 text-destructive dark:bg-destructive/20",
+  cannot: "bg-destructive/10 text-destructive dark:bg-destructive/20",
 };
 
 const availabilityDisplayText: Record<AvailabilityOption, string> = {
-  "unknown": "unknown",
+  unknown: "unknown",
   "18:00-20:00 CEST": "18:00-20:00",
   "20:00-22:00 CEST": "20:00-22:00",
   "All blocks": "All blocks",
-  "cannot": "cannot",
+  cannot: "cannot",
 };
 
-export function ScheduleTable({ scheduleData, onAvailabilityChange, onRoleChange, onPlayerNameChange, isLoading }: ScheduleTableProps) {
+export function ScheduleTable({
+  scheduleData,
+  onAvailabilityChange,
+  onRoleChange,
+  onPlayerNameChange,
+  isLoading,
+}: ScheduleTableProps) {
   const tableRef = useRef<HTMLDivElement>(null);
   const [openDropdowns, setOpenDropdowns] = useState<Set<string>>(new Set());
   const [editingName, setEditingName] = useState<string | null>(null);
   const [editedName, setEditedName] = useState<string>("");
 
   const handleOpenChange = (key: string, isOpen: boolean) => {
-    setOpenDropdowns(prev => {
+    setOpenDropdowns((prev) => {
       const next = new Set(prev);
-      if (isOpen) {
-        next.add(key);
-      } else {
-        next.delete(key);
-      }
+      if (isOpen) next.add(key);
+      else next.delete(key);
       return next;
     });
   };
@@ -88,14 +90,12 @@ export function ScheduleTable({ scheduleData, onAvailabilityChange, onRoleChange
   };
 
   const groupedByRole = scheduleData.reduce((acc, player) => {
-    if (!acc[player.role]) {
-      acc[player.role] = [];
-    }
+    if (!acc[player.role]) acc[player.role] = [];
     acc[player.role].push(player);
     return acc;
   }, {} as Record<string, PlayerAvailability[]>);
 
-  const roleOrder = ["Tank", "DPS", "Support", "Analyst", "Coach"];
+  const roleOrder = ["AR", "SUB", "FLEX", "MANAGER", "COACH"];
 
   return (
     <div className="w-full overflow-hidden rounded-lg border border-border bg-card" ref={tableRef}>
@@ -125,34 +125,24 @@ export function ScheduleTable({ scheduleData, onAvailabilityChange, onRoleChange
               if (playersInRole.length === 0) return null;
 
               return playersInRole.map((player) => (
-                <tr
-                  key={player.playerId}
-                  className="border-t border-border hover-elevate"
-                >
+                <tr key={player.playerId} className="border-t border-border hover-elevate">
                   <td className="border-r border-border px-2 py-2 bg-card">
                     <Select
                       value={player.role}
                       onValueChange={(value: RoleType) => {
-                        if (onRoleChange) {
-                          onRoleChange(player.playerId, value);
-                        }
+                        if (onRoleChange) onRoleChange(player.playerId, value);
                       }}
                       disabled={isLoading}
                     >
-                      <SelectTrigger
-                        className={`w-full h-9 text-xs font-medium ${roleColors[role]} border-0`}
-                      >
-                        <SelectValue>
-                          {roleDisplayNames[player.role]}
-                        </SelectValue>
+                      <SelectTrigger className={`w-full h-9 text-xs font-medium ${roleColors[role]} border-0`}>
+                        <SelectValue>{roleDisplayNames[player.role]}</SelectValue>
                       </SelectTrigger>
-
                       <SelectContent>
-                        <SelectItem value="Tank">Tank</SelectItem>
-                        <SelectItem value="DPS">DPS</SelectItem>
-                        <SelectItem value="Support">Support</SelectItem>
-                        <SelectItem value="Analyst">Analyst</SelectItem>
-                        <SelectItem value="Coach">Coach</SelectItem>
+                        <SelectItem value="AR">AR</SelectItem>
+                        <SelectItem value="SUB">SUB</SelectItem>
+                        <SelectItem value="FLEX">FLEX</SelectItem>
+                        <SelectItem value="MANAGER">Manager</SelectItem>
+                        <SelectItem value="COACH">Coach</SelectItem>
                       </SelectContent>
                     </Select>
                   </td>
@@ -167,12 +157,13 @@ export function ScheduleTable({ scheduleData, onAvailabilityChange, onRoleChange
                           if (e.key === "Enter") handleNameSave(player.playerId);
                           if (e.key === "Escape") handleNameCancel();
                         }}
+                        className="h-8 text-sm"
                         autoFocus
                       />
                     ) : (
                       <div
                         onClick={() => handleNameEdit(player.playerId, player.playerName)}
-                        className="cursor-pointer px-2 py-1 rounded-md hover:bg-accent/50"
+                        className="text-sm font-medium text-card-foreground cursor-pointer hover:bg-accent/50 px-2 py-1 rounded-md"
                       >
                         {player.playerName}
                       </div>
@@ -184,7 +175,7 @@ export function ScheduleTable({ scheduleData, onAvailabilityChange, onRoleChange
                     const dropdownKey = `${player.playerId}-${day}`;
 
                     return (
-                      <td key={day} className="border-r border-border px-2 py-2 bg-card">
+                      <td key={day} className="border-r border-border px-2 py-2 bg-card last:border-r-0">
                         <Select
                           value={availability}
                           onValueChange={(value: AvailabilityOption) =>
@@ -197,12 +188,11 @@ export function ScheduleTable({ scheduleData, onAvailabilityChange, onRoleChange
                             className={`w-full h-9 text-xs font-medium ${availabilityColors[availability]} border-0`}
                           >
                             <SelectValue>
-                              <span className="truncate">
+                              <span className="block truncate">
                                 {availabilityDisplayText[availability]}
                               </span>
                             </SelectValue>
                           </SelectTrigger>
-
                           <SelectContent>
                             {availabilityOptions.map((option) => (
                               <SelectItem key={option} value={option}>
@@ -222,8 +212,8 @@ export function ScheduleTable({ scheduleData, onAvailabilityChange, onRoleChange
       </div>
 
       {scheduleData.length === 0 && (
-        <div className="py-12 text-center text-muted-foreground">
-          No players in the schedule
+        <div className="py-12 text-center">
+          <p className="text-muted-foreground text-sm">No players in the schedule</p>
         </div>
       )}
     </div>
