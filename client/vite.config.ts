@@ -21,14 +21,19 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      "@": path.resolve(import.meta.dirname, "client", "src"),
-      "@shared": path.resolve(import.meta.dirname, "shared"),
-      "@assets": path.resolve(import.meta.dirname, "attached_assets"),
+      // الآن لأننا داخل client/ مباشرة
+      "@": path.resolve(import.meta.dirname, "src"),
+      // shared موجودة في المستوى اللي فوق
+      "@shared": path.resolve(import.meta.dirname, "../shared"),
+      // ونفس الشي للأصول
+      "@assets": path.resolve(import.meta.dirname, "../attached_assets"),
     },
   },
-  root: path.resolve(import.meta.dirname, "client"),
+  // root صار هو نفس مجلد client نفسه
+  root: import.meta.dirname,
   build: {
-    outDir: path.resolve(import.meta.dirname, "dist/public"),
+    // نخرّج ملفات الواجهة إلى dist/public في جذر المشروع
+    outDir: path.resolve(import.meta.dirname, "../dist/public"),
     emptyOutDir: true,
   },
   server: {
